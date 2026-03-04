@@ -13,33 +13,38 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x] # اختبار التوافق مع أحدث نسخ Node.js
+        # Cross-version compatibility testing for ecosystem stability
+        node-version: [18.x, 20.x] 
 
     steps:
     - name: 🛰️ Checkout Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4 # Upgraded to v4 for enhanced reliability and security
 
     - name: 🟢 Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4 # Aligned with GitHub's latest runner environment
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
 
     - name: 📦 Install Hardened Dependencies
-      run: npm ci # استخدام ci لضمان تثبيت النسخ المطابقة بدقة
+      # Enforcing deterministic dependency resolution via 'npm ci'
+      run: npm ci 
 
     - name: 🏗️ Verify Deterministic Build
       run: npm run build
 
     - name: 🧪 Run Integrity Tests (Fixed-Point Suite)
-      run: npm test -- --coverage # تشغيل الاختبارات مع تقرير التغطية
+      # Executing precision validation and generating coverage artifacts
+      run: npm test -- --coverage 
 
     - name: 🛡️ Security Audit
+      # Proactively auditing for high-risk vulnerabilities in the supply chain
       run: npm audit --audit-level=high
 
     - name: 📊 Upload Coverage Results
       if: always()
-      uses: actions/upload-artifact@v3
+      # Upgraded to v4 to resolve artifact deprecation issues (Referencing GitHub's 2024 standards)
+      uses: actions/upload-artifact@v4 
       with:
         name: coverage-report-${{ matrix.node-version }}
         path: coverage/
