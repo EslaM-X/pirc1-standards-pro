@@ -1,16 +1,43 @@
 {
   "name": "pirc1-standards-pro",
-  "version": "1.0.0",
-  "description": "Implementation proposal for PIRC1 Utility Standards",
+  "version": "2.0.0",
+  "description": "The Hardened PiRC1 Utility Standard: Deterministic Sigmoid Logic & PEP Security Protocol",
   "main": "src/SigmoidTierLogic.ts",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EslaM-X/pirc1-standards-pro.git"
+  },
+  "keywords": [
+    "Pi-Network",
+    "Web3",
+    "Blockchain-Interoperability",
+    "Deterministic-Validation",
+    "PEP-Protocol",
+    "Fixed-Point-Math"
+  ],
+  "author": "EslaM-X (Technical Architect)",
+  "license": "MIT",
   "scripts": {
-    "test": "jest"
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "security-audit": "npm audit",
+    "prepublishOnly": "npm run test && npm run build"
+  },
+  "dependencies": {
+    "crypto": "^1.0.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
     "jest": "^29.5.0",
     "ts-jest": "^29.1.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.4"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "verbose": true
   }
 }
-
