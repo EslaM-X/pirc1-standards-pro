@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "CommonJS",
-    "lib": ["ES2020", "DOM"],
+    "jsx": "react-jsx",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -13,4 +14,3 @@
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.test.ts"]
 }
-
