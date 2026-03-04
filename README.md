@@ -47,7 +47,8 @@ await reportActivity({
   signature: backendHmacSignature // Secure anti-spoofing layer
 });
 ```
-```The App-Manifest Schema
+The App-Manifest Schema
+```josn
 {
   "utility_framework": {
     "version": "1.0.0",
@@ -63,15 +64,36 @@ await reportActivity({
   }
 }
 ```
- Strategic Impact
-​Sybil Resistance: Only genuine, KYC-verified human interactions are rewarded.
-​Massive Adoption: "Plug-and-Play" tools for the 50k+ Pi developer community.
-​Trustless Transparency: Mathematical floors (P_{floor}) and Escrow locks are exposed via SDK hooks.
-​🏛️ About the Architect
-​EslaM-X is a Senior Technical Architect specializing in decentralized systems and scalable Web3 infrastructure. Having engineered the foundational architecture for major Pi ecosystem utilities (formerly at Map-of-Pi), he now focuses on setting global protocol standards for the Pi Core Team and the wider community.
-​🤝 Collaboration & Feedback
-​I am ready to provide the full codebase and detailed implementation logic to the Pi Core Team. Let's build a Pi ecosystem that is technically invincible.
-​Connect with me: GitHub | LinkedIn | PiRC1 Discussion
-​© 2026 EslaM-X. Released under MIT License. Standardizing the future of Pi Network.
-## 🏗️ Origin & Development
+---
+
+### 🧪 Quality Assurance
+* ✅ **Unit Tests:** Passed (Sigmoid precision & PEP integrity verified)
+* ✅ **Schema Validation:** Manifest standards compliant with PiRC1 requirements.
+
+---
+
+### 💡 Strategic Impact
+* **Sybil Resistance:** Only genuine, KYC-verified human interactions are rewarded.
+* **Massive Adoption:** "Plug-and-Play" tools for the 50k+ Pi developer community.
+* **Trustless Transparency:** Mathematical floors ($P_{floor}$) and Escrow locks are exposed via SDK hooks.
+
+---
+
+### 🏗️ Origin & Development
 This architecture was originally conceptualized and developed by **EslaM-X** to stabilize and secure high-impact dApps within the Pi Ecosystem, providing the foundation for scalable Web3 commerce. It represents the evolution of production-grade solutions implemented to solve real-world infrastructure challenges.
+
+---
+
+### 🏛️ About the Architect
+**EslaM-X** is a Senior Technical Architect specializing in decentralized systems and scalable Web3 infrastructure. Having engineered the foundational architecture for major Pi ecosystem utilities (formerly at Map-of-Pi), he now focuses on setting global protocol standards for the Pi Core Team and the wider community.
+
+---
+
+### 🤝 Collaboration & Feedback
+I am ready to provide the full codebase and detailed implementation logic to the Pi Core Team. Let's build a Pi ecosystem that is technically invincible.
+
+**Connect with me:** [GitHub](https://github.com/EslaM-X) | [LinkedIn](#) | [PiRC1 Discussion](https://github.com/PiNetwork/PiRC/pull/2)
+
+---
+© 2026 EslaM-X. Released under MIT License. Standardizing the future of Pi Network.
+
