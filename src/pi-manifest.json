@@ -1,0 +1,26 @@
+{
+  "app_identity": {
+    "app_id": "MAPLYPI_MATRIX",
+    "developer_name": "EslaM-X",
+    "version": "1.0.0",
+    "category": "E-commerce & Utility"
+  },
+  "utility_framework": {
+    "standards_compliance": "PiRC1-PEP",
+    "weights": {
+      "on_chain_tx": 0.50,
+      "daily_active_usage": 0.20,
+      "marketplace_contribution": 0.30
+    },
+    "verification": {
+      "method": "HMAC-SHA256_Signed_Payloads",
+      "replay_protection": "nonce-based",
+      "kyc_enforced": true
+    }
+  },
+  "governance": {
+    "escrow_lock_days": 365,
+    "transparency_level": "High",
+    "audit_status": "Community-Pending"
+  }
+}
