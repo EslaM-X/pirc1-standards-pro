@@ -1,4 +1,4 @@
-name: Node.js CI
+name: PiRC1 Protocol Integrity CI
 
 on:
   push:
@@ -7,15 +7,39 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  integrity-check:
+    name: Standard Validation & Security Audit
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x] # اختبار التوافق مع أحدث نسخ Node.js
+
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js
+    - name: 🛰️ Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: 🟢 Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
-        node-version: '18.x'
-    - run: npm install
-    - run: npm test
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
 
+    - name: 📦 Install Hardened Dependencies
+      run: npm ci # استخدام ci لضمان تثبيت النسخ المطابقة بدقة
+
+    - name: 🏗️ Verify Deterministic Build
+      run: npm run build
+
+    - name: 🧪 Run Integrity Tests (Fixed-Point Suite)
+      run: npm test -- --coverage # تشغيل الاختبارات مع تقرير التغطية
+
+    - name: 🛡️ Security Audit
+      run: npm audit --audit-level=high
+
+    - name: 📊 Upload Coverage Results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report-${{ matrix.node-version }}
+        path: coverage/
