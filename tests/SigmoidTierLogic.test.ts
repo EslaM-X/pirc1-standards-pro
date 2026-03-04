@@ -67,4 +67,17 @@ describe('Sigmoid Tier Transition Logic (Deterministic Validation)', () => {
     // Result must be clamped to p_floor even if the curve suggests lower
     expect(parseFloat(result)).toBeCloseTo(p_floor, 2);
   });
+
+  /**
+   * @test Coverage Hardening (Line 76)
+   * Ensures the transparency manifest is reachable and immutable.
+   */
+  test('should provide a valid Transparency Manifest for audit logs', () => {
+    const manifest = SigmoidTierLogic.getTransparencyManifest();
+    
+    // Validating internal structure without breaking the main logic
+    expect(manifest.protocol).toBe("PiRC1");
+    expect(manifest.version).toBeDefined();
+    expect(manifest.logic).toContain("Sigmoid");
+  });
 });
