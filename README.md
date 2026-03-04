@@ -46,6 +46,7 @@ await reportActivity({
   payload: { amount: 25.0, txId: "pi_88x2..." },
   signature: backendHmacSignature // Secure anti-spoofing layer
 });
+```
 ```The App-Manifest Schema
 {
   "utility_framework": {
