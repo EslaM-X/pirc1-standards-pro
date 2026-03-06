@@ -2,25 +2,39 @@
   "app_identity": {
     "app_id": "MAPLYPI",
     "developer_name": "EslaM-X",
-    "version": "1.0.0",
-    "category": "E-commerce & Utility"
+    "version": "2.1.0-PRO",
+    "category": "Decentralized E-commerce & Infrastructure",
+    "standards": ["PiRC-100", "PiRC1", "PEP-v2"]
   },
   "utility_framework": {
-    "standards_compliance": "PiRC1-PEP",
-    "weights": {
+    "compliance": {
+      "protocol": "PiRC-100-PEP-Hardened",
+      "math_model": "Deterministic-Fixed-Point",
+      "precision": "18-decimal",
+      "serialization": "RFC-8785-Canonical"
+    },
+    "utility_weights": {
       "on_chain_tx": 0.50,
       "daily_active_usage": 0.20,
-      "marketplace_contribution": 0.30
+      "marketplace_contribution": 0.30,
+      "weight_bounding": "Strict-Normalized-0-1"
     },
-    "verification": {
-      "method": "HMAC-SHA256_Signed_Payloads",
-      "replay_protection": "nonce-based",
-      "kyc_enforced": true
+    "security_manifest": {
+      "verification_method": "HMAC-SHA256_RFC8785_Canonical_Payloads",
+      "key_management": "Hybrid_ECDH_Backend_Rotation_Model",
+      "replay_protection": "Nonce-Timestamp-Hybrid",
+      "kyc_enforced": true,
+      "min_p_floor": 0.15
     }
   },
   "governance": {
     "escrow_lock_days": 365,
-    "transparency_level": "High",
-    "audit_status": "Community-Pending"
+    "transparency_layer": "Developer-Facing-Trust-Layer",
+    "audit_status": "Ready-for-Launchpad-Grade-Audit",
+    "attack_surface_status": "Governance-Minimized"
+  },
+  "metadata": {
+    "signature_schema": "PEP-Canonical-v2-Hardened",
+    "engine": "MaplyPi-Matrix-Decentralized-Rails"
   }
 }
