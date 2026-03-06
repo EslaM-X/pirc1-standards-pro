@@ -7,13 +7,10 @@ import referenceVectors from './vectors/pirc100-reference.json';
  * @file RFC8785_Vectors.test.ts
  * @module PiRC100-Integrity-Suite
  * @description 
- * Advanced Test Suite for PiRC-100 Deterministic Serialization compliance.
- * Verifies strict adherence to RFC 8785 (JSON Canonicalization Scheme - JCS).
- * * @audit_compliance 
- * Target: 100% Branch and Statement Coverage. 
- * Includes Fault-Injection for Lines 55-63, 121-122 (Validator) and 90-96 (SecurityManager).
+ * Finalized Test Suite for PiRC-100 Deterministic Serialization.
+ * Engineered for 100% Audit Coverage without breaking Frontend-Backend parity.
  * * @author EslaM-X | Lead Technical Architect
- * @version 2.2.5
+ * @version 2.2.6
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
@@ -87,7 +84,8 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
     });
 
     test('Gate 5: Should enforce Maximum Recursion Depth limits', () => {
-      const deep = { a: { b: { c: { d: { e: { f: { g: 1 } } } } } } };
+      // Depth = 6 to trigger the MAX_DEPTH = 5 limit
+      const deep = { a: { b: { c: { d: { e: { f: 1 } } } } } };
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       expect(PiRC100Validator.canonicalize(deep)).toBe(""); 
       spy.mockRestore();
@@ -99,32 +97,37 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       const hash = PiRC100Validator.generateDeterministicHash(payload);
       const integrity = PiRC100Validator.verifyIntegrity(payload, secret);
       expect(hash).toHaveLength(64);
-      expect(integrity).toBeDefined();
+      expect(typeof integrity).toBe('string');
     });
 
     /**
-     * @gate Gate 8: Final Path Exhaustion (The Audit Closer)
-     * Targets Uncovered Lines: Validator (55-63, 121-122) & SecurityManager (90-96)
+     * @gate Gate 8: Absolute Logical Path Exhaustion (The Audit Closer)
+     * Specifically designed to hit Uncovered Lines: 55-63 and 121-122.
      */
     test('Gate 8: Absolute Logical Path Exhaustion for 100% Audit Compliance', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      // Target: Validator Depth Violation [55-63]
-      const deepFailure = { a: { b: { c: { d: { e: { f: { g: { h: 1 } } } } } } } };
+      /** * Trigger: Validator Depth Violation [Lines 55-63] 
+       * Forces the recursive guard to trip and return an empty string.
+       */
+      const deepFailure = { a: { b: { c: { d: { e: { f: { g: 1 } } } } } } };
       expect(PiRC100Validator.canonicalize(deepFailure)).toBe("");
 
-      // Target: SecurityManager Catch Block [90-96]
+      /** * Trigger: SecurityManager Catch Block [Lines 90-96] 
+       * Forces an internal error during signing to exercise the catch block.
+       */
       const circular: any = { id: "fault-injection" };
       circular.self = circular; 
       const secureFailure = SecurityManager.generatePEPProof(circular);
       expect(secureFailure.signature).toBe(""); 
 
-      // Target: Validator Integrity Catch/Edge [121-122]
-      // Passing an object that would fail internally in verifyIntegrity logic
+      /** * Trigger: Validator Integrity Fail-Safe [Lines 121-122] 
+       * Validates our new architectural decision to return 'false' on invalid payloads.
+       */
       const integrityFailure = PiRC100Validator.verifyIntegrity(undefined as any, "secret");
       expect(integrityFailure).toBe(false);
 
-      // Coverage for direct primitives
+      // Final coverage for primitive type branches
       expect(PiRC100Validator.canonicalize(42)).toBe("42");
       expect(PiRC100Validator.canonicalize(true)).toBe("true");
       
