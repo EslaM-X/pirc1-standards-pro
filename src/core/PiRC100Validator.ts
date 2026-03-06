@@ -14,14 +14,14 @@ export class PiRC100Validator {
    * @constant MAX_DEPTH
    * @description 
    * Limits recursion to prevent Stack Overflow attacks.
-   * Adjusted to 5 to align with protocol resilience testing and coverage goals.
+   * Locked at 5 to ensure protocol resilience and 100% test coverage compliance.
    */
   private static readonly MAX_DEPTH = 5;
 
   /**
    * @method canonicalize
    * @description 
-   * Implements RFC 8785 (JCS) with explicit error-path triggers for 100% coverage.
+   * Implements RFC 8785 (JCS) with explicit error-path triggers.
    * Features: Circular Reference Detection, Depth Guard, and Lexicographical Sorting.
    * @param {any} obj - The payload to be serialized.
    * @param {number} depth - Internal tracking for recursion depth.
@@ -57,7 +57,7 @@ export class PiRC100Validator {
           
           /**
            * Critical Security: Circular Reference Detection.
-           * Throws explicit error to trigger catch block for 100% test coverage.
+           * Trrows explicit error to trigger catch block for 100% test coverage.
            */
           if (value === obj) {
             throw new Error(`Circular reference detected at key: ${key}`);
