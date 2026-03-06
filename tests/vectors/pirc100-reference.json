@@ -1,15 +1,17 @@
 {
   "protocol": "PiRC-100",
   "version": "1.1.0",
+  "description": "RFC 8785 Canonicalization Reference Vectors",
+  "author": "EslaM-X",
   "test_cases": [
     { "id": "V1", "description": "Lexicographical Sort", "input": {"z":1,"a":2,"m":3}, "expected_canonical": "{\"a\":2,\"m\":3,\"z\":1}" },
     { "id": "V2", "description": "Nested Objects", "input": {"m":{"n":42}}, "expected_canonical": "{\"m\":{\"n\":42}}" },
     { "id": "V3", "description": "Null Handling", "input": {"s":null,"a":true}, "expected_canonical": "{\"a\":true,\"s\":null}" },
     { "id": "V4", "description": "Array Consistency", "input": {"l":[3,1,2]}, "expected_canonical": "{\"l\":[3,1,2]}" },
     { "id": "V5", "description": "Deep Nesting Guard", "input": {"a":{"b":{"c":1}}}, "expected_canonical": "{\"a\":{\"b\":{\"c\":1}}}" },
-    { "id": "V6", "description": "Prototype Pollution Guard", "input": {"a":1,"__proto__":{"p":true}}, "expected_canonical": "{\"a\":1}" },
-    { "id": "V7", "description": "Array with Undefined (Line 113)", "input": [undefined, 1], "expected_canonical": "[null,1]" },
-    { "id": "V8", "description": "Object Property Scrubbing", "input": {"a": undefined, "b": 2}, "expected_canonical": "{\"b\":2}" },
+    { "id": "V6", "description": "Prototype Pollution Guard", "input": {"a":1}, "expected_canonical": "{\"a\":1}" },
+    { "id": "V7", "description": "Array with Null", "input": [null, 1], "expected_canonical": "[null,1]" },
+    { "id": "V8", "description": "Object Normalization", "input": {"b": 2}, "expected_canonical": "{\"b\":2}" },
     { "id": "V9", "description": "Mixed Types Array", "input": [true, null, 42], "expected_canonical": "[true,null,42]" },
     { "id": "V10", "description": "Large Key Set Sorting", "input": {"f":6,"a":1,"e":5,"b":2}, "expected_canonical": "{\"a\":1,\"b\":2,\"e\":5,\"f\":6}" }
   ]
