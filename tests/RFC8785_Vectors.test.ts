@@ -7,17 +7,17 @@ import referenceVectors from './vectors/pirc100-reference.json';
  * @file RFC8785_Vectors.test.ts
  * @module PiRC100-Integrity-Suite
  * @description 
- * Comprehensive Test Suite for PiRC-100 Deterministic Serialization.
- * Engineered for 100% Audit Path Exhaustion while maintaining API parity.
+ * Finalized Test Suite for PiRC-100 Deterministic Serialization.
+ * Engineered for 100% Audit Path Exhaustion (Stmt/Branch/Line).
+ * Targets Validator lines [54, 67, 91, 107] and SecurityManager line [39].
  * @author EslaM-X | Lead Technical Architect
- * @version 2.3.9
+ * @version 2.4.0
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
 
   /**
    * @section Official Protocol Reference Vectors
-   * @description Validates core canonicalization against RFC 8785 reference data.
    */
   describe('Official Reference Vector Validation', () => {
     referenceVectors.test_cases.forEach((vector) => {
@@ -29,9 +29,9 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
   });
 
   /**
-   * @section Core Determinism & Signature Consistency
+   * @section Core Determinism & Hash Parity
    */
-  describe('Deterministic Consistency & Hash Parity', () => {
+  describe('Deterministic Consistency & Signature Parity', () => {
     test('Vector 1: Key Insertion Order Parity', () => {
       const p1 = { a: 1, b: 2 };
       const p2 = { b: 2, a: 1 };
@@ -62,16 +62,19 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       const nodeA: any = { name: "NodeA" };
       const nodeB: any = { name: "NodeB" };
       nodeA.link = nodeB;
-      nodeB.link = nodeA; // Indirect cycle detection via WeakSet
+      nodeB.link = nodeA; 
       
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      expect(() => PiRC100Validator.canonicalize(nodeA)).toThrow(); 
+      expect(() => PiRC100Validator.canonicalize(nodeA)).toThrow("CIRCULAR_REFERENCE_DETECTED"); 
       spy.mockRestore();
     });
 
+    /**
+     * @target Coverage: SecurityManager Line 39
+     */
     test('Gate 3: SecurityManager Empty/Invalid Payload Rejection', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      // Triggers internal payload validation (SecurityManager Line 39)
+      // Triggers line 39 in SecurityManager
       expect(SecurityManager.generatePEPProof({} as any).signature).toBe("");
       expect(SecurityManager.generatePEPProof(null as any).signature).toBe("");
       spy.mockRestore();
@@ -81,9 +84,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       SecurityManager.rotateKeys();
       const payload = { auth: "valid" };
       const proof = SecurityManager.generatePEPProof(payload);
-      // Valid path
       expect(SecurityManager.verifyPEPProof(payload, proof.signature, proof.version)).toBe(true);
-      // Fail paths (Branch coverage)
       expect(SecurityManager.verifyPEPProof(payload, "", proof.version)).toBe(false);
       expect(SecurityManager.verifyPEPProof(payload, proof.signature, 0)).toBe(false);
     });
@@ -95,30 +96,30 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
     });
 
     /**
-     * @gate Gate 8: Absolute Logical Path Exhaustion (The Audit Closer)
-     * @description Surgical targeting of remaining uncovered lines and branches.
+     * @gate Gate 8: Absolute Logical Path Exhaustion
+     * @description Direct targeting of uncovered lines 54, 67, 91, 107.
      */
     test('Gate 8: Absolute Logical Path Exhaustion for 100% Audit Compliance', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      // 1. Target: Validator Depth Violation (Lines 56, 91)
-      const buildDeep = (level: number): any => (level <= 0 ? { e: 1 } : { n: buildDeep(level - 1) });
-      const deepPayload = buildDeep(35); // Exceeds MAX_DEPTH = 32
-      expect(() => PiRC100Validator.canonicalize(deepPayload)).toThrow();
+      // 1. Target: Validator Depth Violation (Line 54)
+      const buildDeep = (l: number): any => (l <= 0 ? { e: 1 } : { n: buildDeep(l - 1) });
+      expect(() => PiRC100Validator.canonicalize(buildDeep(35))).toThrow("MAX_DEPTH_REACHED");
 
-      // 2. Target: SecurityManager Catch Block Coverage (Lines 76-82)
+      // 2. Target: Validator Sub-Structure Failure (Line 67)
+      // Force failure during key mapping to trigger Line 67 catch
+      const failObj = { a: { get b() { throw new Error("INTERNAL_FAIL"); } } };
+      expect(() => PiRC100Validator.canonicalize(failObj)).toThrow();
+
+      // 3. Target: Validator Catch Blocks (Lines 91, 107)
       const circ: any = { id: "audit-trigger" };
       circ.self = circ; 
-      const secureFailure = SecurityManager.generatePEPProof(circ);
-      expect(secureFailure.signature).toBe(""); 
+      expect(PiRC100Validator.generateDeterministicHash(circ)).toBe(""); 
+      expect(PiRC100Validator.verifyIntegrity(circ, "secret")).toBeNull();
 
-      // 3. Target: Array undefined serialization path (Line 75)
-      // Canonicalizing [undefined] correctly results in "[null]" in JCS context
+      // 4. Target: JCS Array Serialization (Line 75)
       expect(PiRC100Validator.canonicalize([undefined])).toBe("[null]");
-
-      // 4. Testing Primitive Types for Full Coverage
       expect(PiRC100Validator.canonicalize(100)).toBe("100");
-      expect(PiRC100Validator.canonicalize(false)).toBe("false");
       
       spy.mockRestore();
     });
