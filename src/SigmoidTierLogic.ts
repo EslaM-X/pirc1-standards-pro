@@ -23,6 +23,9 @@ export class SigmoidTierLogic {
    * Implements Deterministic Fixed-Point Logic.
    * Ensures mathematical fairness by preventing execution environment inconsistencies.
    * @param {number} x - The input engagement metric.
+   * @param {number} L_val - Maximum capacity of the sigmoid (L).
+   * @param {number} k_val - Steepness of the curve (k).
+   * @param {number} x0_val - Midpoint of the sigmoid (x0).
    * @returns {string} - Deterministic result with 18-decimal precision.
    */
   public static calculateSigmoidTier(
@@ -32,11 +35,13 @@ export class SigmoidTierLogic {
     x0_val: number = 50
   ): string {
     // 1. Convert inputs to Fixed-Point BigInt for deterministic pre-validation
+    // Using 1e6 as a precision buffer for the exponent calculation
     const x_fixed = BigInt(Math.floor(x * 1e6));
     const k_fixed = BigInt(Math.floor(k_val * 1e6));
     const x0_fixed = BigInt(Math.floor(x0_val * 1e6));
 
     // 2. High-precision Sigmoid calculation mapping
+    // We stabilize the exponent calculation before passing to Math.exp
     const exponent = Number((k_fixed * (x_fixed - x0_fixed)) / BigInt(1e6)) / -1000000;
     const denominator = 1 + Math.exp(exponent);
     
@@ -67,7 +72,7 @@ export class SigmoidTierLogic {
     
     // Threat Model Mitigation: Immediate protocol-level exclusion of unverified actors.
     if (!isKycVerified) {
-      return "0.000000000000000000";
+      return (0).toFixed(18); // "0.000000000000000000"
     }
 
     // Apply Hardened Sigmoid logic with weight bounding & normalization
