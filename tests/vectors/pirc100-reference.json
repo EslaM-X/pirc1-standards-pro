@@ -1,48 +1,16 @@
 {
   "protocol": "PiRC-100",
-  "version": "1.0.0",
-  "description": "RFC 8785 Canonicalization & Deterministic Hashing Reference Vectors",
-  "author": "EslaM-X",
+  "version": "1.1.0",
   "test_cases": [
-    {
-      "id": "V1_LEXICOGRAPHICAL_SORT",
-      "input": {
-        "z": 1,
-        "a": 2,
-        "m": 3
-      },
-      "expected_canonical": "{\"a\":2,\"m\":3,\"z\":1}",
-      "expected_sha256": "4e384896f634351636c0756770f3801f467540203f7e1636c0756770f3801f46"
-    },
-    {
-      "id": "V2_NESTED_OBJECTS",
-      "input": {
-        "meta": {
-          "nonce": 42,
-          "type": "TX"
-        },
-        "data": "transfer"
-      },
-      "expected_canonical": "{\"data\":\"transfer\",\"meta\":{\"nonce\":42,\"type\":\"TX\"}}",
-      "expected_sha256": "9a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b"
-    },
-    {
-      "id": "V3_NULL_HANDLING",
-      "input": {
-        "status": null,
-        "active": true
-      },
-      "expected_canonical": "{\"active\":true,\"status\":null}",
-      "expected_sha256": "f1e2d3c4b5a697887766554433221100aabbccddeeff00112233445566778899"
-    },
-    {
-      "id": "V4_ARRAY_CONSISTENCY",
-      "input": {
-        "list": [3, 1, 2],
-        "tags": ["web3", "pirc100"]
-      },
-      "expected_canonical": "{\"list\":[3,1,2],\"tags\":[\"web3\",\"pirc100\"]}",
-      "expected_sha256": "b1a2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2"
-    }
+    { "id": "V1", "description": "Lexicographical Sort", "input": {"z":1,"a":2,"m":3}, "expected_canonical": "{\"a\":2,\"m\":3,\"z\":1}" },
+    { "id": "V2", "description": "Nested Objects", "input": {"m":{"n":42}}, "expected_canonical": "{\"m\":{\"n\":42}}" },
+    { "id": "V3", "description": "Null Handling", "input": {"s":null,"a":true}, "expected_canonical": "{\"a\":true,\"s\":null}" },
+    { "id": "V4", "description": "Array Consistency", "input": {"l":[3,1,2]}, "expected_canonical": "{\"l\":[3,1,2]}" },
+    { "id": "V5", "description": "Deep Nesting Guard", "input": {"a":{"b":{"c":1}}}, "expected_canonical": "{\"a\":{\"b\":{\"c\":1}}}" },
+    { "id": "V6", "description": "Prototype Pollution Guard", "input": {"a":1,"__proto__":{"p":true}}, "expected_canonical": "{\"a\":1}" },
+    { "id": "V7", "description": "Array with Undefined (Line 113)", "input": [undefined, 1], "expected_canonical": "[null,1]" },
+    { "id": "V8", "description": "Object Property Scrubbing", "input": {"a": undefined, "b": 2}, "expected_canonical": "{\"b\":2}" },
+    { "id": "V9", "description": "Mixed Types Array", "input": [true, null, 42], "expected_canonical": "[true,null,42]" },
+    { "id": "V10", "description": "Large Key Set Sorting", "input": {"f":6,"a":1,"e":5,"b":2}, "expected_canonical": "{\"a\":1,\"b\":2,\"e\":5,\"f\":6}" }
   ]
 }
