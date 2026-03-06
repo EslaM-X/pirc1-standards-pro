@@ -1,7 +1,7 @@
 {
   "name": "pirc1-standards-pro",
-  "version": "2.0.0",
-  "description": "The Hardened PiRC1 Utility Standard: Deterministic Sigmoid Logic & PEP Security Protocol",
+  "version": "2.1.0",
+  "description": "The Definitive PiRC-100 Utility Standard: RFC 8785 Deterministic Validation & Hybrid PEP Security Protocol",
   "main": "src/SigmoidTierLogic.ts",
   "types": "dist/index.d.ts",
   "repository": {
@@ -11,12 +11,13 @@
   "keywords": [
     "Pi-Network",
     "Web3",
-    "Blockchain-Interoperability",
+    "PiRC-100",
+    "RFC-8785",
     "Deterministic-Validation",
     "PEP-Protocol",
-    "Fixed-Point-Math"
+    "Hybrid-Cryptography"
   ],
-  "author": "EslaM-X (Technical Architect)",
+  "author": "EslaM-X (Lead Technical Architect)",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
