@@ -46,7 +46,12 @@ export class PiRC100Validator {
       
       // Phase 4: Deterministic Array Processing
       if (Array.isArray(obj)) {
-        return '[' + obj.map(item => PiRC100Validator.canonicalize(item, depth + 1)).join(',') + ']';
+        const items = obj.map(item => {
+          const res = PiRC100Validator.canonicalize(item, depth + 1);
+          if (res === "" && item !== null && item !== undefined) throw new Error("Nested failure");
+          return res;
+        });
+        return '[' + items.join(',') + ']';
       }
 
       // Phase 5: Lexicographical Key Sorting (Core JCS requirement)
@@ -57,13 +62,19 @@ export class PiRC100Validator {
           
           /**
            * Critical Security: Circular Reference Detection.
-           * Throws explicit error to trigger catch block for 100% test coverage.
            */
           if (value === obj) {
             throw new Error(`Circular reference detected at key: ${key}`);
           }
           
-          return `${JSON.stringify(key)}:${PiRC100Validator.canonicalize(value, depth + 1)}`;
+          const processedValue = PiRC100Validator.canonicalize(value, depth + 1);
+          
+          // Atomic Validation: If sub-tree fails, the whole branch must fail to protect the hash.
+          if (processedValue === "" && value !== null && value !== undefined) {
+            throw new Error("Recursive limit reached in sub-structure");
+          }
+          
+          return `${JSON.stringify(key)}:${processedValue}`;
         })
         .join(',');
         
