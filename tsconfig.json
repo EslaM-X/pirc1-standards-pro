@@ -1,17 +1,25 @@
 {
   "compilerOptions": {
+    /* Base Options */
     "target": "ES2020",
     "module": "CommonJS",
     "jsx": "react-jsx",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    
+    /* Strictness & Security */
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    
+    /* Deterministic Build & CI/CD Optimization */
+    "isolatedModules": true, // Required to resolve ts-jest warnings and ensure safe transpilation
     "declaration": true,
     "moduleResolution": "node",
     "outDir": "./dist",
     "rootDir": "./src",
+    
+    /* Path Mapping & Interoperability */
     "baseUrl": ".",
     "paths": {
       "@core/*": ["src/core/*"]
