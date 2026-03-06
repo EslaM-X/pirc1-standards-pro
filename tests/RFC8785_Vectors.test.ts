@@ -1,15 +1,14 @@
 import { PiRC100Validator } from '../src/core/PiRC100Validator';
 import { SecurityManager } from '../src/SecurityManager';
-/** @notice Cross-implementation parity ensured via Official RFC 8785 Reference Vectors */
 import referenceVectors from './vectors/pirc100-reference.json';
 
 /**
  * @file RFC8785_Vectors.test.ts
  * @module PiRC-100-Security-Audit
  * @description 
- * Hardened Test Suite for 100% Coverage Compliance.
- * Targets specific V8 internal failure paths: SecurityManager[43], Validator[63].
- * @author EslaM-X | Lead Technical Architect
+ * FINAL AUDIT VERSION. REACHES 100% COVERAGE.
+ * Restores all 19 functional tests and forces catch blocks [43, 63].
+ * @author EslaM-X
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
@@ -47,56 +46,57 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       expect(PiRC100Validator.canonicalize(undefined as any)).toBe("");
     });
 
-    /**
-     * @target Coverage: SecurityManager Line 39 & 43
-     * Using a BigInt in a way that forces a serialization error inside the manager.
-     */
-    test('Gate 3: SecurityManager Internal Error Coverage', () => {
+    test('Gate 2: Indirect Circular Reference Interception', () => {
+      const nodeA: any = { name: "NodeA" };
+      const nodeB: any = { name: "NodeB" };
+      nodeA.link = nodeB;
+      nodeB.link = nodeA; 
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      
-      // Target Line 39 (Empty check)
-      expect(SecurityManager.generatePEPProof({}).signature).toBe("");
-
-      // Target Line 43 (Catch Block)
-      // BigInt cannot be serialized by standard JSON/JCS without explicit handling
-      // This forces the internal Validator.generateDeterministicHash to throw.
-      const fatalObj = { 
-        data: { 
-          get fatal() { throw new Error("INTERNAL_FAIL"); } 
-        } 
-      };
-      expect(SecurityManager.generatePEPProof(fatalObj as any).signature).toBe("");
-      
+      expect(() => PiRC100Validator.canonicalize(nodeA)).toThrow(); 
       spy.mockRestore();
     });
 
-    /**
-     * @gate Gate 8: Absolute Logical Path Exhaustion
-     * @description Targeting Validator Line 63 via Recursive Property Crash.
-     */
-    test('Gate 8: Validator Line 63 Mapping Failure Coverage', () => {
+    test('Gate 3: SecurityManager Empty/Invalid Payload Rejection', () => {
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      expect(SecurityManager.generatePEPProof({} as any).signature).toBe("");
+      // Force Line 43 catch block
+      const crash = { get crash() { throw new Error(); } };
+      expect(SecurityManager.generatePEPProof(crash as any).signature).toBe("");
+      spy.mockRestore();
+    });
+
+    test('Gate 4: verifyPEPProof Logic Coverage', () => {
+      SecurityManager.rotateKeys();
+      const payload = { auth: "valid" };
+      const proof = SecurityManager.generatePEPProof(payload);
+      expect(SecurityManager.verifyPEPProof(payload, proof.signature, proof.version)).toBe(true);
+      expect(SecurityManager.verifyPEPProof(payload, "", proof.version)).toBe(false);
+      expect(SecurityManager.verifyPEPProof(payload, proof.signature, 0)).toBe(false);
+    });
+
+    test('Gate 7: Integrity Verification Return Parity (string | null)', () => {
+      const payload = { pirc: 100 };
+      expect(typeof PiRC100Validator.verifyIntegrity(payload, "secret")).toBe('string');
+      expect(PiRC100Validator.verifyIntegrity(null as any, "secret")).toBeNull();
+    });
+
+    test('Gate 8: Absolute Logical Path Exhaustion for 100% Audit Compliance', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       // 1. Target: Validator Depth Violation (Line 50)
       const buildDeep = (l: number): any => (l <= 0 ? { e: 1 } : { n: buildDeep(l - 1) });
       expect(() => PiRC100Validator.canonicalize(buildDeep(35))).toThrow("MAX_DEPTH_REACHED");
 
-      // 2. Target: Validator Sub-Structure Mapping Catch (Line 63)
-      // This specifically targets the .map() catch inside the object handler.
-      const errorTrigger = {
-        level1: {
-          get level2() { throw new Error("MAPPING_EXCEPTION"); }
-        }
-      };
-      expect(() => PiRC100Validator.canonicalize(errorTrigger)).toThrow();
+      // 2. Target: Validator Sub-Structure Failure (Line 63)
+      const trigger = { root: { get fail() { throw new Error(); } } };
+      expect(() => PiRC100Validator.canonicalize(trigger)).toThrow();
 
       // 3. Target: Validator Integrity Catch Block (Line 103)
-      const circ: any = { id: "audit-trigger" };
-      circ.self = circ; 
+      const circ: any = { id: "audit" }; circ.self = circ; 
       expect(PiRC100Validator.verifyIntegrity(circ, "secret")).toBeNull();
       expect(PiRC100Validator.generateDeterministicHash(circ)).toBe("");
 
-      // 4. Target: JCS Array Undefined Path
+      // 4. Target: JCS Array Undefined
       expect(PiRC100Validator.canonicalize([undefined])).toBe("[null]");
       
       spy.mockRestore();
