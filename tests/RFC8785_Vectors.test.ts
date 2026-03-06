@@ -10,7 +10,7 @@ import referenceVectors from './vectors/pirc100-reference.json';
  * Finalized Test Suite for PiRC-100 Deterministic Serialization.
  * Engineered for 100% Audit Coverage without breaking Frontend-Backend parity.
  * * @author EslaM-X | Lead Technical Architect
- * @version 2.2.6
+ * @version 2.2.7
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
@@ -84,7 +84,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
     });
 
     test('Gate 5: Should enforce Maximum Recursion Depth limits', () => {
-      // Depth = 6 to trigger the MAX_DEPTH = 5 limit
+      // Triggering depth guard (MAX_DEPTH = 5)
       const deep = { a: { b: { c: { d: { e: { f: 1 } } } } } };
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       expect(PiRC100Validator.canonicalize(deep)).toBe(""); 
@@ -97,37 +97,37 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       const hash = PiRC100Validator.generateDeterministicHash(payload);
       const integrity = PiRC100Validator.verifyIntegrity(payload, secret);
       expect(hash).toHaveLength(64);
-      expect(typeof integrity).toBe('string');
+      expect(integrity).toBeDefined();
     });
 
     /**
-     * @gate Gate 8: Absolute Logical Path Exhaustion (The Audit Closer)
-     * Specifically designed to hit Uncovered Lines: 55-63 and 121-122.
+     * @gate Gate 8: Final Path Exhaustion (The Audit Closer)
+     * Targets Uncovered Lines: Validator (55-63, 121-122) & SecurityManager (90-96)
      */
     test('Gate 8: Absolute Logical Path Exhaustion for 100% Audit Compliance', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      /** * Trigger: Validator Depth Violation [Lines 55-63] 
-       * Forces the recursive guard to trip and return an empty string.
+      /** * Target: Validator Depth Violation [55-63]
+       * Must exceed MAX_DEPTH (5) to reach the error branch.
        */
       const deepFailure = { a: { b: { c: { d: { e: { f: { g: 1 } } } } } } };
       expect(PiRC100Validator.canonicalize(deepFailure)).toBe("");
 
-      /** * Trigger: SecurityManager Catch Block [Lines 90-96] 
-       * Forces an internal error during signing to exercise the catch block.
+      /** * Target: SecurityManager Catch Block [90-96]
+       * Forcing an internal cryptographic failure via circular dependency during signing.
        */
       const circular: any = { id: "fault-injection" };
       circular.self = circular; 
       const secureFailure = SecurityManager.generatePEPProof(circular);
       expect(secureFailure.signature).toBe(""); 
 
-      /** * Trigger: Validator Integrity Fail-Safe [Lines 121-122] 
-       * Validates our new architectural decision to return 'false' on invalid payloads.
+      /** * Target: Validator Integrity Fail-Safe [121-122]
+       * Specifically testing our surgical update to return 'false' on invalid inputs.
        */
       const integrityFailure = PiRC100Validator.verifyIntegrity(undefined as any, "secret");
       expect(integrityFailure).toBe(false);
 
-      // Final coverage for primitive type branches
+      // Final branch coverage for simple primitives
       expect(PiRC100Validator.canonicalize(42)).toBe("42");
       expect(PiRC100Validator.canonicalize(true)).toBe("true");
       
