@@ -11,7 +11,7 @@ import referenceVectors from './vectors/pirc100-reference.json';
  * Engineered for 100% Audit Path Exhaustion (Stmt/Branch/Line).
  * Targets Validator uncovered lines [50, 63, 103] and SecurityManager [39].
  * @author EslaM-X | Lead Technical Architect
- * @version 2.4.9
+ * @version 2.5.2
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
@@ -71,13 +71,19 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
     /**
      * @target Coverage: SecurityManager Line 39
-     * Inducing specific payload rejection paths.
+     * Inducing specific payload rejection paths and internal error catch.
      */
     test('Gate 3: SecurityManager Empty/Invalid Payload Rejection', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      // Triggers line 39 in SecurityManager
+      
+      // Target line 39: validation branch
       expect(SecurityManager.generatePEPProof({} as any).signature).toBe("");
       expect(SecurityManager.generatePEPProof(null as any).signature).toBe("");
+      
+      // Target line 43: catch block (using a throwing circular reference)
+      const circ: any = {}; circ.self = circ;
+      expect(SecurityManager.generatePEPProof(circ).signature).toBe("");
+      
       spy.mockRestore();
     });
 
@@ -108,18 +114,15 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       expect(() => PiRC100Validator.canonicalize(buildDeep(35))).toThrow("MAX_DEPTH_REACHED");
 
       // 2. Target: Validator Sub-Structure Failure (Line 63)
-      // Using a throwing getter to trigger the catch inside mapping
+      // Using a throwing getter to trigger the catch block inside key mapping
       const proxyErr = { a: { get b() { throw new Error("INTERNAL_FAIL"); } } };
       expect(() => PiRC100Validator.canonicalize(proxyErr)).toThrow();
 
-      // 3. Target: Validator Catch Block in verifyIntegrity & generateHash (Line 103)
+      // 3. Target: Validator Integrity Catch Block (Line 103)
       const circ: any = { id: "audit-trigger" };
       circ.self = circ; 
       expect(PiRC100Validator.verifyIntegrity(circ, "secret")).toBeNull();
       expect(PiRC100Validator.generateDeterministicHash(circ)).toBe("");
-      
-      // Also triggers SecurityManager catch block by proxy
-      expect(SecurityManager.generatePEPProof(circ).signature).toBe(""); 
 
       // 4. Target: JCS Array Undefined Serialization
       expect(PiRC100Validator.canonicalize([undefined])).toBe("[null]");
