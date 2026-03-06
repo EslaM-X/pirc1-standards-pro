@@ -13,6 +13,8 @@
     { "id": "V7", "description": "Array with Null", "input": [null, 1], "expected_canonical": "[null,1]" },
     { "id": "V8", "description": "Object Normalization", "input": {"b": 2}, "expected_canonical": "{\"b\":2}" },
     { "id": "V9", "description": "Mixed Types Array", "input": [true, null, 42], "expected_canonical": "[true,null,42]" },
-    { "id": "V10", "description": "Large Key Set Sorting", "input": {"f":6,"a":1,"e":5,"b":2}, "expected_canonical": "{\"a\":1,\"b\":2,\"e\":5,\"f\":6}" }
+    { "id": "V10", "description": "Large Key Set Sorting", "input": {"f":6,"a":1,"e":5,"b":2}, "expected_canonical": "{\"a\":1,\"b\":2,\"e\":5,\"f\":6}" },
+    { "id": "V11", "description": "Boolean & Numeric Types", "input": {"bool":false,"n":1.5}, "expected_canonical": "{\"bool\":false,\"n\":1.5}" },
+    { "id": "V12", "description": "Empty Structures", "input": {"a":{},"b":[]}, "expected_canonical": "{\"a\":{},\"b\":[]}" }
   ]
 }
