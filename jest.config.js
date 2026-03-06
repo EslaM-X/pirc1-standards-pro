@@ -4,12 +4,14 @@
  * Centralized testing configuration for the PiRC1-Protocol and PiRC-100 Standards.
  * Engineered to enforce strict TypeScript execution, deterministic validation, 
  * and comprehensive cryptographic coverage reporting.
- * * Integrated with the RFC 8785 (JCS) Deterministic Validation Suite to ensure 
+ * Integrated with the RFC 8785 (JCS) Deterministic Validation Suite to ensure 
  * zero hash divergence across distributed node environments.
+ * @version 2.1.0-PRO
+ * @author EslaM-X | Lead Technical Architect
  */
 
 module.exports = {
-  // Utilizing ts-jest preset for seamless TypeScript integration and type-checking during test cycles.
+  // Utilizing ts-jest preset for seamless TypeScript integration and type-checking.
   preset: 'ts-jest',
 
   // Target environment set to Node.js to mirror the backend execution context.
@@ -26,8 +28,8 @@ module.exports = {
 
   /**
    * @section CoverageThreshold
-   * @description Defines strict architectural guardrails to prevent untested logic from entering production.
-   * Enforces a "Zero-Defect" policy by requiring 100% function coverage.
+   * @description Defines strict architectural guardrails to prevent untested logic.
+   * Enforces a "Zero-Defect" policy by requiring 100% function coverage for PiRC-100.
    */
   coverageThreshold: {
     global: {
@@ -46,13 +48,13 @@ module.exports = {
 
   /**
    * @section Transformation
-   * @description Configures the TypeScript pre-processor with optimized settings.
+   * @description Optimized TypeScript pre-processor settings.
+   * Adjusted to prevent "isolatedModules" deprecation warnings in CI/CD environments.
    */
   transform: {
     '^.+\\.ts$': ['ts-jest', {
-      tsconfig: 'tsconfig.json',
-      // isolatedModules: true ensures faster transpilation and prevents cross-file side effects.
-      isolatedModules: true
+      // Configuration moved here to align with ts-jest v29.x+ standards.
+      tsconfig: 'tsconfig.json'
     }]
   },
 
