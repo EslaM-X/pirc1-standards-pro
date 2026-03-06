@@ -1,17 +1,26 @@
 import { PiRC100Validator } from '../src/core/PiRC100Validator';
 import { SecurityManager } from '../src/SecurityManager';
+/** @notice Reference parity against RFC 8785 (JCS) Standard */
 import referenceVectors from './vectors/pirc100-reference.json';
 
 /**
  * @file RFC8785_Vectors.test.ts
  * @description 
- * FINAL AUDIT VERSION - ZERO REGRESSION.
- * Engineered by EslaM-X to reach 100% Path Exhaustion.
- * This version forces internal catch-blocks 43 and 63 to execute.
+ * DEFINITIVE SECURITY AUDIT SUITE.
+ * Engineered for 100% path exhaustion, specifically targeting internal catch-blocks 
+ * in SecurityManager.ts:43 and PiRC100Validator.ts:63.
+ * * @author EslaM-X | Lead Technical Architect
+ * @version 2.8.2
+ * @license Proprietary / PiRC-100 Standard
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
 
+  /**
+   * @group Standard-Validation
+   * Validates canonicalization against official reference vectors to ensure 
+   * cross-platform deterministic consistency.
+   */
   describe('Official Reference Vector Validation', () => {
     referenceVectors.test_cases.forEach((vector) => {
       test(`Reference Case ${vector.id}: Should match JCS canonical output`, () => {
@@ -21,6 +30,10 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
     });
   });
 
+  /**
+   * @group Hash-Integrity
+   * Confirms that key insertion order does not mutate the resulting cryptographic hash.
+   */
   describe('Deterministic Consistency & Hash Parity', () => {
     test('Vector 1: Key Insertion Order Parity', () => {
       const p1 = { a: 1, b: 2 };
@@ -38,6 +51,10 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
     });
   });
 
+  /**
+   * @group Resilience-Audit
+   * Stress-testing the system's ability to handle malformed data and recursive structures.
+   */
   describe('Resilience Testing & Security Gates', () => {
     
     test('Gate 1: Null and Undefined Protocol Handling', () => {
@@ -50,6 +67,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       const nodeB: any = { name: "NodeB" };
       nodeA.link = nodeB;
       nodeB.link = nodeA; 
+      
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       expect(() => PiRC100Validator.canonicalize(nodeA)).toThrow(); 
       spy.mockRestore();
@@ -57,21 +75,24 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
     /**
      * @target SecurityManager.ts:43
-     * Forces the internal catch block by passing an object that 
-     * cannot be processed by the internal cryptographic logic.
+     * @description Injects an enumerable getter exception to force the internal catch block
+     * during the cryptographic hashing phase.
      */
     test('Gate 3: SecurityManager Internal Error Coverage', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      // Line 39 coverage
+      // Target: Empty check (Line 39)
       expect(SecurityManager.generatePEPProof({} as any).signature).toBe("");
 
-      // Line 43 coverage: Forced Internal Error
-      const fatal: any = { 
-        toJSON: () => { throw new Error("INTERNAL_FATAL"); } 
-      };
-      expect(SecurityManager.generatePEPProof(fatal).signature).toBe("");
+      // Target: Fatal Error Catch (Line 43)
+      const fatal = Object.create(null, {
+        trigger: {
+          get: () => { throw new Error("INTERNAL_FATAL_SIMULATION"); },
+          enumerable: true 
+        }
+      });
       
+      expect(SecurityManager.generatePEPProof(fatal).signature).toBe("");
       spy.mockRestore();
     });
 
@@ -90,31 +111,31 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
     /**
      * @target PiRC100Validator.ts:63 & 83
-     * The "Recursive Bomb" strategy to ensure the map function fails 
-     * during the sorting/processing phase.
+     * @description Orchestrates a recursive 'Getter Bomb' to trigger map failures 
+     * within the canonicalization loop for 100% audit compliance.
      */
-    test('Gate 8: Absolute Path Exhaustion (Line 63 & 83)', () => {
+    test('Gate 8: Absolute Logical Path Exhaustion', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      // 1. Depth Limit (Line 34)
+      // 1. Coverage: Depth Limit (Line 34)
       const buildDeep = (l: number): any => (l <= 0 ? { x: 1 } : { n: buildDeep(l - 1) });
       expect(() => PiRC100Validator.canonicalize(buildDeep(35))).toThrow();
 
-      // 2. Forced Mapping Catch (Line 63 & 83)
-      const poison = {
-        get bomb() { throw new Error("MAPPING_EXCEPTION"); }
-      };
-      // Object.defineProperty ensures it's seen during Object.keys loop
-      Object.defineProperty(poison, 'bomb', { enumerable: true });
-      
-      expect(() => PiRC100Validator.canonicalize(poison)).toThrow();
+      // 2. Coverage: Internal Mapping Catch (Line 63)
+      const poison = Object.create(null, {
+        bomb: {
+          get: () => { throw new Error("MAPPING_EXCEPTION"); },
+          enumerable: true
+        }
+      });
+      expect(() => PiRC100Validator.canonicalize({ data: poison })).toThrow();
 
-      // 3. Integrity Catch (Line 103)
+      // 3. Coverage: Integrity Catch (Line 103)
       const circ: any = { id: 1 }; circ.self = circ; 
       expect(PiRC100Validator.verifyIntegrity(circ, "secret")).toBeNull();
       expect(PiRC100Validator.generateDeterministicHash(circ)).toBe("");
 
-      // 4. Array Normalization
+      // 4. Coverage: JCS Array Compliance
       expect(PiRC100Validator.canonicalize([undefined])).toBe("[null]");
       
       spy.mockRestore();
