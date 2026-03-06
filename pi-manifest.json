@@ -1,16 +1,17 @@
 {
   "app_identity": {
-    "app_id": "MAPLYPI-MATRIX",
+    "app_id": "MAPLYPI",
     "developer_name": "EslaM-X",
-    "version": "2.0.0-PRO",
+    "version": "2.1.0-PRO",
     "category": "Decentralized E-commerce & Infrastructure",
-    "standards": ["PiRC1", "PEP-v2"]
+    "standards": ["PiRC-100", "PiRC1", "PEP-v2"]
   },
   "utility_framework": {
     "compliance": {
-      "protocol": "PiRC1-PEP-Hardened",
+      "protocol": "PiRC-100-PEP-Hardened",
       "math_model": "Deterministic-Fixed-Point",
-      "precision": "18-decimal"
+      "precision": "18-decimal",
+      "serialization": "RFC-8785-Canonical"
     },
     "utility_weights": {
       "on_chain_tx": 0.50,
@@ -19,8 +20,8 @@
       "weight_bounding": "Strict-Normalized-0-1"
     },
     "security_manifest": {
-      "verification_method": "HMAC-SHA256_Signed_Canonical_Payloads",
-      "key_management": "Backend_Registration_Rotation_Model",
+      "verification_method": "HMAC-SHA256_RFC8785_Canonical_Payloads",
+      "key_management": "Hybrid_ECDH_Backend_Rotation_Model",
       "replay_protection": "Nonce-Timestamp-Hybrid",
       "kyc_enforced": true,
       "min_p_floor": 0.15
@@ -33,7 +34,7 @@
     "attack_surface_status": "Governance-Minimized"
   },
   "metadata": {
-    "signature_schema": "PEP-Canonical-v2",
+    "signature_schema": "PEP-Canonical-v2-Hardened",
     "engine": "MaplyPi-Matrix-Decentralized-Rails"
   }
 }
