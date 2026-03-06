@@ -10,7 +10,7 @@ import referenceVectors from './vectors/pirc100-reference.json';
  * Finalized Test Suite for PiRC-100 Deterministic Serialization.
  * Engineered for 100% Audit Coverage without breaking Frontend-Backend parity.
  * * @author EslaM-X | Lead Technical Architect
- * @version 2.2.7
+ * @version 2.2.8
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
@@ -108,13 +108,13 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       /** * Target: Validator Depth Violation [55-63]
-       * Must exceed MAX_DEPTH (5) to reach the error branch.
+       * Must exceed MAX_DEPTH (5) to reach the error branch. Sending level 7.
        */
-      const deepFailure = { a: { b: { c: { d: { e: { f: { g: 1 } } } } } } };
+      const deepFailure = { l1: { l2: { l3: { l4: { l5: { l6: { l7: 1 } } } } } } };
       expect(PiRC100Validator.canonicalize(deepFailure)).toBe("");
 
       /** * Target: SecurityManager Catch Block [90-96]
-       * Forcing an internal cryptographic failure via circular dependency during signing.
+       * Forcing internal cryptographic failure via circular dependency to hit 'catch'.
        */
       const circular: any = { id: "fault-injection" };
       circular.self = circular; 
@@ -122,14 +122,14 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       expect(secureFailure.signature).toBe(""); 
 
       /** * Target: Validator Integrity Fail-Safe [121-122]
-       * Specifically testing our surgical update to return 'false' on invalid inputs.
+       * Testing the return false logic for non-object/null inputs.
        */
-      const integrityFailure = PiRC100Validator.verifyIntegrity(undefined as any, "secret");
+      const integrityFailure = PiRC100Validator.verifyIntegrity(null as any, "secret");
       expect(integrityFailure).toBe(false);
 
-      // Final branch coverage for simple primitives
-      expect(PiRC100Validator.canonicalize(42)).toBe("42");
-      expect(PiRC100Validator.canonicalize(true)).toBe("true");
+      // Final coverage for simple primitives (Lines Coverage)
+      expect(PiRC100Validator.canonicalize(100)).toBe("100");
+      expect(PiRC100Validator.canonicalize(false)).toBe("false");
       
       spy.mockRestore();
     });
