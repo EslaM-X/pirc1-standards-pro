@@ -11,7 +11,7 @@ import referenceVectors from './vectors/pirc100-reference.json';
  * Engineered for 100% Audit Path Exhaustion (Stmt/Branch/Line).
  * Targets Validator uncovered lines [50, 63, 103] and SecurityManager [39, 43].
  * @author EslaM-X | Lead Technical Architect
- * @version 2.5.5
+ * @version 2.6.0
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
@@ -81,9 +81,9 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       expect(SecurityManager.generatePEPProof(null as any).signature).toBe("");
       
       // Target line 43: SecurityManager catch block coverage
-      // We pass an object that will cause a crash inside the Validator
-      const thrower = new Proxy({}, { get: () => { throw new Error("CRASH"); } });
-      expect(SecurityManager.generatePEPProof(thrower).signature).toBe("");
+      // Induction of a crash via Proxy trap during serialization
+      const trap = new Proxy({ a: 1 }, { get: () => { throw new Error("CRASH_INDUCTION"); } });
+      expect(SecurityManager.generatePEPProof(trap).signature).toBe("");
       
       spy.mockRestore();
     });
@@ -115,7 +115,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       expect(() => PiRC100Validator.canonicalize(buildDeep(35))).toThrow("MAX_DEPTH_REACHED");
 
       // 2. Target: Validator Sub-Structure Failure (Line 63)
-      // Using a throwing Proxy property to trigger the inner map() catch block
+      // Throwing Proxy property to trigger inner map() catch block
       const trigger = new Proxy({ val: 1 }, { 
         get: (t, p) => { if(p === 'val') throw new Error("FAIL"); return t[p as keyof typeof t]; } 
       });
