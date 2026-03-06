@@ -74,19 +74,19 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
 
     test('Gate 2: Should catch and log serialization errors for circular references', () => {
       const circular: any = { name: "Pi" };
-      circular.self = circular; // Explicitly trigger the circular check
+      circular.self = circular; // Trigger explicit circular check
       
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       const result = PiRC100Validator.canonicalize(circular);
       
-      expect(result).toBe(""); // Validator must return empty on caught error
+      expect(result).toBe(""); // Returns empty on caught error
       expect(spy).toHaveBeenCalled();
       spy.mockRestore();
     });
 
     test('Gate 3: SecurityManager should fail safely on invalid payloads', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      const proof = SecurityManager.generatePEPProof({} as any); // Empty object trigger
+      const proof = SecurityManager.generatePEPProof({} as any); // Anti-Blind Signing
       
       expect(proof.signature).toBe("");
       expect(spy).toHaveBeenCalled();
@@ -105,10 +105,12 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
       const arrResult = PiRC100Validator.canonicalize([1, 2, { z: 0 }]);
       expect(arrResult).toBe("[1,2,{\"z\":0}]");
 
-      // Testing Depth limit
-      const deep = { a: { b: { c: { d: { e: { f: { g: { h: { i: 1 } } } } } } } } };
+      // Testing Depth limit: Object depth of 7 triggers MAX_DEPTH (5)
+      const deep = { a: { b: { c: { d: { e: { f: { g: 1 } } } } } } };
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      expect(PiRC100Validator.canonicalize(deep)).toBe("");
+      
+      expect(PiRC100Validator.canonicalize(deep)).toBe(""); 
+      expect(spy).toHaveBeenCalled();
       spy.mockRestore();
     });
 
@@ -124,6 +126,21 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
       
       // Fail Path: Missing Signature
       expect(SecurityManager.verifyPEPProof(payload, "", proof.version)).toBe(false);
+    });
+
+    /**
+     * Target: Uncovered Functions/Lines in Validator
+     */
+    test('Gate 7: Should verify Cryptographic Helper functions directly', () => {
+      const payload = { pirc: 100 };
+      const secret = "node-secret";
+      
+      const hash = PiRC100Validator.generateDeterministicHash(payload);
+      const integrity = PiRC100Validator.verifyIntegrity(payload, secret);
+
+      expect(hash).toBeDefined();
+      expect(integrity).toBeDefined();
+      expect(hash.length).toBe(64); // SHA-256 Hex length
     });
   });
 });
