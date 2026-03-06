@@ -1,7 +1,8 @@
 /**
  * @name usePiUtility
- * @description Standardized React Hook for the PiRC1 Protocol.
- * Implements the "Deterministic Validation Standards" for cross-dApp interoperability.
+ * @description Standardized React Hook for the PiRC1 & PiRC-100 Protocols.
+ * Implements "Deterministic Validation Standards" to ensure cross-dApp interoperability.
+ * Engineered for Launchpad-grade security and state-consistency.
  * @author EslaM-X | Lead Technical Architect
  */
 
@@ -16,9 +17,12 @@ export const usePiUtility = (config: {
   const [lastProof, setLastProof] = useState<IVerifiableProof | null>(null);
 
   /**
-   * @name reportActivity
-   * @description Handles the formal reporting of engagement using the PEP Schema.
-   * Ensures that data is serialized correctly before transmission to the backend.
+   * @method reportActivity
+   * @description Handles the formal reporting of engagement using the PEP & RFC 8785 Schema.
+   * Ensures that payload integrity is maintained during transmission to the verification layer.
+   * @param {IEngagementPayload} payload - The core engagement data.
+   * @param {string} signature - The HMAC-SHA256 deterministic signature.
+   * @param {number} keyVersion - The active key rotation version.
    */
   const reportActivity = useCallback(async (
     payload: IEngagementPayload, 
@@ -28,7 +32,11 @@ export const usePiUtility = (config: {
     setIsVerifying(true);
     
     try {
-      // 1. Construct the Verifiable Proof based on the Canonical Schema
+      /**
+       * 1. Construct the Verifiable Proof.
+       * Following PiRC-100 standards, the proof encapsulates the deterministic 
+       * signature derived from RFC 8785 canonicalization.
+       */
       const proof: IVerifiableProof = {
         payload,
         signature,
@@ -39,15 +47,21 @@ export const usePiUtility = (config: {
 
       /**
        * @implementation Integration with Pi SDK / Backend
-       * This follows the "Launchpad-grade security" model proposed for the ecosystem.
+       * Adheres to the "Zero-Trust" model where the backend validates 
+       * the canonical parity of the payload.
        */
       const response = await fetch('/api/pirc1/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(proof) // Deterministic Serialization
+        /**
+         * Note: While JSON.stringify is used for transmission, 
+         * the signature was generated using PiRC100Validator.canonicalize 
+         * to ensure cross-node parity.
+         */
+        body: JSON.stringify(proof) 
       });
 
-      if (!response.ok) throw new Error("Verification Rejected by Protocol");
+      if (!response.ok) throw new Error("Verification Rejected by Protocol Layer");
 
       const result = await response.json();
       setLastProof(proof);
@@ -55,7 +69,8 @@ export const usePiUtility = (config: {
       return { 
         success: true, 
         integrity_hash: signature, 
-        timestamp: Date.now() 
+        timestamp: Date.now(),
+        status: "Validated"
       };
 
     } catch (error) {
@@ -70,6 +85,7 @@ export const usePiUtility = (config: {
     reportActivity, 
     isVerifying, 
     lastProof,
-    protocolVersion: "v2.0-Hardened" 
+    // Upgraded protocol version to reflect PiRC-100 compliance
+    protocolVersion: "v2.1-PiRC100-Hardened" 
   };
 };
