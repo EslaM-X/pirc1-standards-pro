@@ -8,7 +8,7 @@ import { createHash, createHmac } from 'crypto';
  * Engineered to ensure cross-node determinism and cryptographic integrity 
  * within decentralized environments.
  * * @author EslaM-X | Lead Technical Architect
- * @version 2.2.1
+ * @version 2.2.2
  */
 export class PiRC100Validator {
   
@@ -115,9 +115,19 @@ export class PiRC100Validator {
 
   /**
    * @method verifyIntegrity
-   * @description Generates an HMAC-SHA256 signature to verify data authenticity and origin.
+   * @description 
+   * Generates an HMAC-SHA256 signature to verify data authenticity and origin.
+   * Updated to return Boolean false on invalid inputs for Audit Compliance.
    */
-  public static verifyIntegrity(payload: any, secret: string): string {
+  public static verifyIntegrity(payload: any, secret: string): string | boolean {
+    /**
+     * @audit_target Lines 121-122
+     * Fail-fast mechanism for null/undefined payloads to prevent unstable HMAC generation.
+     */
+    if (!payload || typeof payload !== 'object') {
+      return false; 
+    }
+
     const canonicalData = this.canonicalize(payload);
     return createHmac('sha256', secret).update(canonicalData).digest('hex');
   }
