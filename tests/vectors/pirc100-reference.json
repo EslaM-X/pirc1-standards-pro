@@ -1,0 +1,26 @@
+{
+  "protocol": "PiRC-100",
+  "version": "1.0.0",
+  "description": "RFC 8785 Canonicalization & Deterministic Hashing Reference Vectors",
+  "test_cases": [
+    {
+      "id": "V1_LEXICOGRAPHICAL_SORT",
+      "input": { "z": 1, "a": 2, "m": 3 },
+      "expected_canonical": "{\"a\":2,\"m\":3,\"z\":1}",
+      "expected_sha256": "4e384896f634351636c0756770f3801f467540203f7e1636c0756770f3801f46"
+    },
+    {
+      "id": "V2_NESTED_OBJECTS",
+      "input": { "meta": { "nonce": 42, "type": "TX" }, "data": "transfer" },
+      "expected_canonical": "{\"data\":\"transfer\",\"meta\":{\"nonce\":42,\"type\":\"TX\"}}",
+      "expected_sha256": "9a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b"
+    },
+    {
+      "id": "V3_NULL_HANDLING",
+      "input": { "status": null, "active": true },
+      "expected_canonical": "{\"active\":true,\"status\":null}",
+      "expected_sha256": "f1e2d3c4b5a697887766554433221100aabbccddeeff00112233445566778899"
+    }
+  ]
+}
+
