@@ -10,7 +10,7 @@ import referenceVectors from './vectors/pirc100-reference.json';
  * Verifies strict adherence to RFC 8785 (JCS) and Official Reference Vectors.
  * Engineered for 100% Branch and Statement Coverage for Security Audits.
  * @author EslaM-X | Lead Technical Architect
- * @version 2.2.1
+ * @version 2.2.2
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
@@ -30,7 +30,6 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
   /**
    * @test Vector 1: Lexicographical Key Sorting
-   * @description Ensures key reordering does not alter the cryptographic digest.
    */
   test('Vector 1: Should maintain hash parity regardless of key insertion order', () => {
     const payloadAlpha = { version: "1.0.0", asset: "Pi", amount: 100 };
@@ -41,7 +40,6 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
   /**
    * @test Vector 2: Recursive Determinism
-   * @description Validates nested structures follow deterministic sorting rules.
    */
   test('Vector 2: Should enforce recursive determinism in multi-level structures', () => {
     const nestedA = { meta: { type: "TX", nonce: 42 }, data: "transfer" };
@@ -52,7 +50,6 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
   /**
    * @test Vector 3: SecurityManager PEP Consistency
-   * @description Verifies consistent signatures for isomorphic payloads at the Policy Enforcement Point.
    */
   test('Vector 3: SecurityManager must yield consistent signatures for isomorphic payloads', () => {
     SecurityManager.rotateKeys();
@@ -73,16 +70,10 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
   /**
    * @section Protocol Resilience & Fault Tolerance
-   * @description Hardened boundary analysis to ensure system stability under malformed inputs.
    */
   describe('PiRC-100: Resilience & Security Gates', () => {
     
-    /**
-     * @gate Gate 1: Null-Safety Handling (UPDATED FOR JCS COMPLIANCE)
-     * @description Ensures null is serialized as a literal string per RFC 8785.
-     */
     test('Gate 1: Should handle null or undefined inputs with fail-safe mechanisms', () => {
-      // Fix: null input now returns "null" string per JCS standards
       expect(PiRC100Validator.canonicalize(null as any)).toBe("null"); 
       expect(PiRC100Validator.canonicalize(undefined as any)).toBe("");
     });
@@ -119,23 +110,25 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
     });
 
     /**
-     * @gate Gate 8: Absolute Audit Compliance & Branch Hardening
-     * @description Specifically targets remaining logical paths (Lines 49-57) for 100% coverage.
+     * @gate Gate 8: Absolute Branch & Line Coverage Hardening
+     * @description Targets Uncovered Lines 61-63 in Validator and 85-91 in SecurityManager.
      */
     test('Gate 8: Should exercise all remaining logical branches for audit compliance', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      // 1. Triggers nested array failure branch
-      const invalidArray = [ { a: { b: { c: { d: { e: { f: 1 } } } } } } ];
-      expect(PiRC100Validator.canonicalize(invalidArray)).toBe("");
+      // 1. Coverage for PiRC100Validator Lines 61-63: Nested structure failure
+      const deepNestedFailure = { key: { a: { b: { c: { d: { e: { f: 1 } } } } } } };
+      expect(PiRC100Validator.canonicalize(deepNestedFailure)).toBe("");
 
-      // 2. Triggers primitive pass-through branch
-      expect(PiRC100Validator.canonicalize(42)).toBe("42");
-      
-      // 3. Triggers SecurityManager invalid recovery path
-      const secureFailure = SecurityManager.generatePEPProof(null as any);
+      // 2. Coverage for SecurityManager Lines 85-91: Internal catch block recovery
+      const circular: any = { id: "fault-injection" };
+      circular.self = circular; 
+      const secureFailure = SecurityManager.generatePEPProof(circular);
       expect(secureFailure.signature).toBe("");
 
+      // 3. Ensuring primitive pass-through remains deterministic
+      expect(PiRC100Validator.canonicalize(42)).toBe("42");
+      
       spy.mockRestore();
     });
   });
