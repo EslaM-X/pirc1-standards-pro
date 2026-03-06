@@ -5,12 +5,11 @@ import referenceVectors from './vectors/pirc100-reference.json';
 
 /**
  * @file RFC8785_Vectors.test.ts
- * @module PiRC-100-Audit-Suite
+ * @module PiRC-100-Security-Audit
  * @description 
- * Finalized Suite for 100% Path Exhaustion.
+ * FINAL AUDIT VERSION. REACHES 100% COVERAGE.
  * Restores all 19 functional tests and forces catch blocks [43, 63].
  * @author EslaM-X | Lead Technical Architect
- * @version 2.6.5
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
