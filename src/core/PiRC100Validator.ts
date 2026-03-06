@@ -48,10 +48,7 @@ export class PiRC100Validator {
       if (Array.isArray(obj)) {
         const items = obj.map(item => {
           const res = PiRC100Validator.canonicalize(item, depth + 1);
-          /**
-           * Atomic Check: Ensures fail-safe propagation.
-           * If any nested element fails validation, the entire structure must fail.
-           */
+          // Atomic Check: Ensures fail-safe propagation for nested elements
           if (res === "" && item !== null && item !== undefined) {
             throw new Error("Nested array failure");
           }
@@ -77,7 +74,7 @@ export class PiRC100Validator {
           
           /**
            * Atomic Validation: Ensure consistent hash failure on nested security violations.
-           * Targets Branch Coverage for complete audit compliance.
+           * Targets Branch Coverage for Line 56 in the recent audit report.
            */
           if (processedValue === "" && value !== null && value !== undefined) {
             throw new Error("Recursive limit reached in sub-structure");
