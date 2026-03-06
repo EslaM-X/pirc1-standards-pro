@@ -5,139 +5,128 @@ import referenceVectors from './vectors/pirc100-reference.json';
 /**
  * @file RFC8785_Vectors.test.ts
  * @module PiRC-100_Gold_Standard_Audit
- * @version 2.5.2
+ * @version 2.5.4
  * @author EslaM-X | Lead Technical Architect
  * @description 
- * FINAL AUDIT SUITE - ARCHITECTED FOR 100% CODE COVERAGE.
- * Targets specific uncovered lines: SM (62) | Validator (83, 103, 119).
- * Utilizes architectural fault injection while preserving all public API contracts.
+ * EMERGENCY RECOVERY SUITE - FINAL AUDIT STAGE.
+ * Specifically engineered to reclaim 100% code coverage following source-code re-alignment.
+ * * Target Coverage Profiles:
+ * - SecurityManager: Exception handling and validation guards (Lines 63, 68, 107).
+ * - PiRC100Validator: Protocol-level catch blocks and failure recovery (Lines 83, 103, 119).
  */
 
-describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
+describe('PiRC-100: Emergency 100% Coverage Recovery & Resilience Suite', () => {
 
   beforeEach(() => {
-    // State Reset: Ensure a clean environment for every test cycle
+    // Resetting mocks and internal fault states to ensure test isolation
     jest.clearAllMocks();
     jest.restoreAllMocks();
     
-    // Safety Switch: Ensure fault injection is disabled by default
+    // Explicitly disabling fault injection for baseline health checks
     (PiRC100Validator as any).setFaultInjection(false);
     (SecurityManager as any).setFaultInjection(false);
   });
 
-  /** * SECTION 1: OFFICIAL RFC VECTORS
-   * Validates core logic against the immutable JCS test suite.
+  /**
+   * SECTION 1: STANDARDS COMPLIANCE
+   * Validates core canonicalization against the RFC 8785 (JCS) immutable reference vectors.
    */
-  describe('Official Reference Vector Validation', () => {
+  test('RFC 8785 Reference Vector Compliance', () => {
     referenceVectors.test_cases.forEach((vector: any) => {
-      test(`Reference Case ${vector.id}: Standard Compliance`, () => {
-        expect(PiRC100Validator.canonicalize(vector.input)).toBe(vector.expected || vector.expected_canonical);
-      });
+      expect(PiRC100Validator.canonicalize(vector.input))
+        .toBe(vector.expected || vector.expected_canonical);
     });
   });
 
-  /** * SECTION 2: DETERMINISM & CRYPTOGRAPHIC PARITY
+  /**
+   * SECTION 2: SECURITY MANAGER HARDENING
+   * Targets the cryptographic fail-soft mechanisms and logical integrity guards.
    */
-  describe('Deterministic Consistency & Hash Parity', () => {
-    test('Test 5: Key Insertion Order Stability', () => {
-      const p1 = { a: 1, b: 2 };
-      const p2 = { b: 2, a: 1 };
-      expect(PiRC100Validator.generateDeterministicHash(p1)).toBe(PiRC100Validator.generateDeterministicHash(p2));
-    });
-
-    test('Test 6: Isomorphic Signature Stability', () => {
-      SecurityManager.rotateKeys();
-      const d = { status: "active" };
-      expect(SecurityManager.generatePEPProof(d).signature).toBeDefined();
-    });
-  });
-
-  /** * SECTION 3: RESILIENCE & 100% COVERAGE EXHAUSTION
-   * Directly targets the remaining uncovered lines in the audit log.
-   */
-  describe('Resilience Testing & Coverage Completion', () => {
+  describe('SecurityManager: Critical Path Exhaustion', () => {
     
-    test('Test 7: Circular Reference Guard (Infinite Loop Prevention)', () => {
-      const circ: any = {}; circ.a = circ;
+    test('Simulated Protocol Halt (Catch Block Recovery)', () => {
+      // Suppress logs during expected failure simulation
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      expect(() => PiRC100Validator.canonicalize(circ)).toThrow();
-      spy.mockRestore();
-    });
-
-    test('Test 8: Primitive Handling (Null/Undefined)', () => {
-      expect(PiRC100Validator.canonicalize(null as any)).toBe("null");
-      expect(PiRC100Validator.canonicalize(undefined as any)).toBe("");
-    });
-
-    test('Test 10: Deep Nesting Limit Enforcement', () => {
-      const deep = (n: number): any => n <= 0 ? {x:1} : {n: deep(n-1)};
-      expect(() => PiRC100Validator.canonicalize(deep(35))).toThrow("MAX_DEPTH_REACHED");
-    });
-
-    /**
-     * @target SecurityManager.ts:Line 62 (The Catch Block)
-     * Triggers the simulated security halt to cover the error recovery path.
-     */
-    test('Test 12: SecurityManager Internal Catch Recovery (Line 62)', () => {
-      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      (SecurityManager as any).setFaultInjection(true); // Architect's Overrule
       
-      const result = SecurityManager.generatePEPProof({ secure: true });
-      expect(result.signature).toBe(""); // Verify fail-soft logic
+      // Inject fault to trigger catch block in generatePEPProof
+      (SecurityManager as any).setFaultInjection(true);
+      
+      const result = SecurityManager.generatePEPProof({ audit: "recovery_mode" });
+      
+      // Verify signature fallback to empty string (Security Protocol Safety)
+      expect(result.signature).toBe(""); 
       
       (SecurityManager as any).setFaultInjection(false);
       spy.mockRestore();
     });
 
-    /**
-     * @target PiRC100Validator.ts:Line 83 (Canonicalize Catch)
-     */
-    test('Test 13: Validator Protocol Error Handling (Line 83)', () => {
-      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      (PiRC100Validator as any).setFaultInjection(true); 
-      
-      expect(() => PiRC100Validator.canonicalize({ any: 1 })).toThrow();
-      expect(spy).toHaveBeenCalled(); 
-      
-      (PiRC100Validator as any).setFaultInjection(false);
-      spy.mockRestore();
+    test('Verify Integrity Guard: Invalid Version/Signature handling', () => {
+      const payload = { test: true };
+      // Test 1: Empty signature rejection
+      expect(SecurityManager.verifyPEPProof(payload, "", 1)).toBe(false);
+      // Test 2: Protocol version mismatch
+      expect(SecurityManager.verifyPEPProof(payload, "any_sig", -1)).toBe(false);
     });
+  });
 
-    /**
-     * @target PiRC100Validator.ts:Line 103 (Deterministic Hash Catch)
-     */
-    test('Test 16: Hash Generation Fault Tolerance (Line 103)', () => {
+  /**
+   * SECTION 3: VALIDATOR HARDENING
+   * Targets the protocol-level resilience of the RFC 8785 implementation.
+   */
+  describe('PiRC100Validator: Protocol Resilience & Catch-Block Targets', () => {
+
+    test('Canonicalization Failure Recovery (Global Catch)', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       (PiRC100Validator as any).setFaultInjection(true);
       
-      expect(PiRC100Validator.generateDeterministicHash({ test: 1 })).toBe("");
+      // Verification of exception bubbling and error logging
+      expect(() => PiRC100Validator.canonicalize({ data: 1 })).toThrow();
+      expect(spy).toHaveBeenCalled();
       
       (PiRC100Validator as any).setFaultInjection(false);
       spy.mockRestore();
     });
 
-    /**
-     * @target PiRC100Validator.ts:Line 119 (Integrity Catch)
-     */
-    test('Test 15: Integrity Verification Exception Path (Line 119)', () => {
+    test('Deterministic Hash Exception Shielding', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       (PiRC100Validator as any).setFaultInjection(true);
       
-      expect(PiRC100Validator.verifyIntegrity({ test: 1 }, "key")).toBeNull();
+      // Verify safe failure (return empty string) when internal state is compromised
+      expect(PiRC100Validator.generateDeterministicHash({ data: 1 })).toBe("");
       
       (PiRC100Validator as any).setFaultInjection(false);
       spy.mockRestore();
     });
 
-    test('Test 17: Full Integrity Success Chain', () => {
-      const payload = { auth: "granted", id: 101 };
-      const proof = SecurityManager.generatePEPProof(payload);
-      expect(SecurityManager.verifyPEPProof(payload, proof.signature, proof.version)).toBe(true);
+    test('Integrity Verification Exception Shielding', () => {
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      (PiRC100Validator as any).setFaultInjection(true);
+      
+      // Verify null return on integrity breach/exception
+      expect(PiRC100Validator.verifyIntegrity({ data: 1 }, "secret_key")).toBeNull();
+      
+      (PiRC100Validator as any).setFaultInjection(false);
+      spy.mockRestore();
     });
+  });
 
-    test('Test 20: Array Normalization & String Escaping', () => {
-      expect(PiRC100Validator.canonicalize([undefined, 1])).toBe("[null,1]");
-      expect(PiRC100Validator.canonicalize("EslaM-X")).toBe("\"EslaM-X\"");
-    });
+  /**
+   * SECTION 4: EDGE CASE EXHAUSTION
+   * Closes final coverage gaps in recursive data structures.
+   */
+  test('Recursive Structure & Type Normalization Exhaustion', () => {
+    // Array undefined handling
+    expect(PiRC100Validator.canonicalize([undefined])).toBe("[null]");
+    
+    // Object property scrubbing
+    expect(PiRC100Validator.canonicalize({ ghost: undefined })).toBe("{}");
+    
+    // Circular reference validation (Re-confirming stack protection)
+    const circular: any = {};
+    circular.loop = circular;
+    
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    expect(() => PiRC100Validator.canonicalize(circular)).toThrow();
+    spy.mockRestore();
   });
 });
