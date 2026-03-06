@@ -5,7 +5,7 @@ import referenceVectors from './vectors/pirc100-reference.json';
 /**
  * @file RFC8785_Vectors.test.ts
  * @module PiRC-100_Gold_Standard_Audit
- * @version 2.2.7
+ * @version 2.2.8
  * @author EslaM-X | Lead Technical Architect
  * @description 
  * DEFINITIVE PRODUCTION SUITE - 100% CODE COVERAGE MANDATE.
@@ -15,9 +15,6 @@ import referenceVectors from './vectors/pirc100-reference.json';
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
 
-  /**
-   * Reset environment state before each execution to prevent cross-test contamination.
-   */
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -84,11 +81,10 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
     /**
      * @target SecurityManager.ts:Line 43 (Catch Block)
-     * Utilizes a Proxy Trap to force an immediate runtime exception during property access.
+     * Forces immediate runtime exception using a Proxy Trap.
      */
     test('Test 12: SecurityManager Internal Catch Recovery (Line 43)', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      // Proxy ensures any attempt to read keys triggers an error for the catch block
       const proxyPoison = new Proxy({ trigger: true }, {
         get: () => { throw new Error("FORCE_INTERNAL_CATCH"); }
       });
