@@ -38,13 +38,13 @@ export class PiRC100Validator {
     try {
       /**
        * AUDIT HOOK: Global Exception Path
-       * Triggers a failure to verify the system's ability to log and propagate errors.
+       * Forces a failure to verify the system's ability to log and propagate errors.
        */
       if (this._faultInjection && depth === 0) {
         throw new Error("SIMULATED_PROTOCOL_FAULT");
       }
 
-      // Stage 2: Depth Guard to prevent stack overflow on malicious payloads
+      // Stage 2: Depth Guard to prevent stack overflow
       if (depth >= this.MAX_DEPTH) {
         throw new Error("MAX_DEPTH_REACHED");
       }
@@ -54,7 +54,7 @@ export class PiRC100Validator {
         return JSON.stringify(obj);
       }
 
-      // Stage 4: Circular Reference Guard (Critical for Graph structures)
+      // Stage 4: Circular Reference Guard
       if (visited.has(obj)) {
         throw new Error("CIRCULAR_REFERENCE_DETECTED");
       }
@@ -71,10 +71,10 @@ export class PiRC100Validator {
 
       // Stage 6: Object Key Sorting (Lexicographical)
       const sortedKeys = Object.keys(obj).sort();
-      const result: string [] = [];
+      const result: string[] = [];
 
       for (const key of sortedKeys) {
-        const value = obj [key];
+        const value = obj[key];
         
         // RFC 8785: Keys with undefined values MUST be excluded
         if (value === undefined) continue;
@@ -86,7 +86,7 @@ export class PiRC100Validator {
       return `{${result.join(',')}}`;
 
     } catch (error: any) {
-      // Stage 7: Centralized Audit Logging (Targets 100% Catch Coverage)
+      // Stage 7: Centralized Audit Logging (Ensures Catch Coverage)
       console.error(`[PiRC-100 Security Audit] ${error.message}`);
       throw error; 
     }
@@ -99,7 +99,7 @@ export class PiRC100Validator {
   public static generateDeterministicHash(payload: any): string {
     try {
       /**
-       * AUDIT HOOK: Hash Path Failure simulation
+       * AUDIT HOOK: Hash Path Failure simulation (Critical for 100% Coverage)
        */
       if (this._faultInjection) throw new Error("HASH_LOGIC_FAULT");
       
