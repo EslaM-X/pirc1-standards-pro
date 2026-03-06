@@ -112,11 +112,11 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
       expect(arrResult).toBe("[1,2,{\"z\":0}]");
 
       // 2. High-Friction Security Check: 
-      // Depth of 10 levels ensures we hit the Root Cause of the previous test failure.
+      // We use a depth of 10 levels. Since MAX_DEPTH is 5, the validator must catch the overflow.
       const deep = { a: { b: { c: { d: { e: { f: { g: { h: { i: { j: 1 } } } } } } } } } };
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      // Expected: Empty string to invalidate any potential malicious signature
+      // The validator returns "" when it encounters an error internally.
       expect(PiRC100Validator.canonicalize(deep)).toBe(""); 
       expect(spy).toHaveBeenCalledWith(expect.stringContaining("Maximum recursion depth"));
       spy.mockRestore();
