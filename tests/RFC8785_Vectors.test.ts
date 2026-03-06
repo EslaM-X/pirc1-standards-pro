@@ -52,7 +52,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
   /**
    * @test Vector 3: SecurityManager PEP Consistency
-   * @description Verifies consistent signatures for isomorphic payloads.
+   * @description Verifies consistent signatures for isomorphic payloads at the Policy Enforcement Point.
    */
   test('Vector 3: SecurityManager must yield consistent signatures for isomorphic payloads', () => {
     SecurityManager.rotateKeys();
@@ -73,7 +73,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
   /**
    * @section Protocol Resilience & Fault Tolerance
-   * @description Boundary analysis to ensure stability under malformed inputs.
+   * @description Hardened boundary analysis to ensure system stability under malformed inputs.
    */
   describe('PiRC-100: Resilience & Security Gates', () => {
     
@@ -118,11 +118,24 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       expect(integrity).toBeDefined();
     });
 
-    test('Gate 8: Absolute Branch Coverage Hardening', () => {
+    /**
+     * @gate Gate 8: Absolute Audit Compliance & Branch Hardening
+     * @description Specifically targets remaining logical paths (Lines 49-57) for 100% coverage.
+     */
+    test('Gate 8: Should exercise all remaining logical branches for audit compliance', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      const nestedFailure = { key: { a: { b: { c: { d: { e: { f: 1 } } } } } } };
-      expect(PiRC100Validator.canonicalize(nestedFailure)).toBe("");
+      
+      // 1. Triggers nested array failure branch
+      const invalidArray = [ { a: { b: { c: { d: { e: { f: 1 } } } } } } ];
+      expect(PiRC100Validator.canonicalize(invalidArray)).toBe("");
+
+      // 2. Triggers primitive pass-through branch
       expect(PiRC100Validator.canonicalize(42)).toBe("42");
+      
+      // 3. Triggers SecurityManager invalid recovery path
+      const secureFailure = SecurityManager.generatePEPProof(null as any);
+      expect(secureFailure.signature).toBe("");
+
       spy.mockRestore();
     });
   });
