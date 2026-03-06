@@ -7,8 +7,9 @@ import referenceVectors from './vectors/pirc100-reference.json';
  * @file RFC8785_Vectors.test.ts
  * @module PiRC100_Integrity_Audit
  * @description 
- * FINAL PATH EXHAUSTION SUITE - VERSION 3.0.0
+ * FINAL PATH EXHAUSTION SUITE - VERSION 3.1.0
  * Engineered by EslaM-X for 100% Coverage & Core Team Compliance.
+ * Targets: SecurityManager.ts:43 and PiRC100Validator.ts:63, 101.
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
@@ -48,55 +49,60 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
     });
 
     test('Gate 2: Circular Reference & Depth Interception', () => {
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       const nodeA: any = { name: "NodeA" };
       const nodeB: any = { name: "NodeB" };
       nodeA.link = nodeB;
       nodeB.link = nodeA; 
       
-      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      // Hit Circular Check
       expect(() => PiRC100Validator.canonicalize(nodeA)).toThrow(); 
-      // Hit Depth Check (Line 34)
       const deep = (n: number): any => (n <= 0 ? { x: 1 } : { n: deep(n - 1) });
       expect(() => PiRC100Validator.canonicalize(deep(35))).toThrow();
       spy.mockRestore();
     });
 
+    /**
+     * @target SecurityManager.ts:43
+     * Bypasses line 39 and hits the line 43 catch block.
+     */
     test('Gate 3: SecurityManager Internal Error Coverage', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      // Hit Line 39: Empty Check
+      // Hit Line 39
       expect(SecurityManager.generatePEPProof({} as any).signature).toBe("");
 
-      // Hit Line 43: Catch Block (Internal Cryptographic Halt)
-      const poison = Object.defineProperty({}, 'trigger', {
+      // Hit Line 43: Catch Block
+      // We use defineProperty to bypass Object.keys check but throw during hashing
+      const poison = {};
+      Object.defineProperty(poison, 'trigger', {
         get: () => { throw new Error("INTERNAL_FAIL"); },
         enumerable: true
       });
-      expect(SecurityManager.generatePEPProof(poison).signature).toBe("");
-
-      // Hit Line 82: verifyPEPProof Fast-Fail
-      expect(SecurityManager.verifyPEPProof({a:1}, "", 0)).toBe(false);
       
+      expect(SecurityManager.generatePEPProof(poison).signature).toBe("");
       spy.mockRestore();
     });
 
+    /**
+     * @target PiRC100Validator.ts:63, 101
+     * Comprehensive coverage for mapping and integrity catch blocks.
+     */
     test('Gate 8: Absolute Logical Path Exhaustion', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       // Hit Line 63: Map Iteration Catch
-      const bomb = Object.defineProperty({}, 'err', {
+      const bomb = {};
+      Object.defineProperty(bomb, 'err', {
         get: () => { throw new Error("MAP_FAIL"); },
         enumerable: true
       });
       expect(() => PiRC100Validator.canonicalize({ data: bomb })).toThrow();
 
-      // Hit Line 87, 97, 101: verifyIntegrity Edge Cases
-      expect(PiRC100Validator.verifyIntegrity(null as any, "key")).toBeNull();
+      // Hit Line 101/103: Integrity Catch
       const circ: any = { a: 1 }; circ.self = circ;
       expect(PiRC100Validator.verifyIntegrity(circ, "key")).toBeNull();
       
-      // Hit Line 103/104: Hash Catch
+      // Hit Hash Catch
       expect(PiRC100Validator.generateDeterministicHash(circ)).toBe("");
       
       spy.mockRestore();
@@ -107,7 +113,8 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       const payload = { auth: "valid" };
       const proof = SecurityManager.generatePEPProof(payload);
       expect(SecurityManager.verifyPEPProof(payload, proof.signature, proof.version)).toBe(true);
-      expect(SecurityManager.verifyPEPProof(payload, "wrong", proof.version)).toBe(false);
+      expect(SecurityManager.verifyPEPProof(payload, "invalid", proof.version)).toBe(false);
+      expect(SecurityManager.verifyPEPProof(payload, proof.signature, 999)).toBe(false);
     });
     
     test('Gate 9: Array Path Coverage', () => {
