@@ -7,9 +7,8 @@ import referenceVectors from './vectors/pirc100-reference.json';
  * @file RFC8785_Vectors.test.ts
  * @description 
  * Comprehensive Test Suite for PiRC-100 Deterministic Serialization compliance.
- * Verifies strict adherence to RFC 8785 (JSON Canonicalization Scheme) 
- * to guarantee cryptographic hash parity across heterogeneous environments.
- * Engineered for 100% Branch and Statement Coverage for high-end Security Audits.
+ * Verifies strict adherence to RFC 8785 (JSON Canonicalization Scheme).
+ * Engineered for 100% Branch and Statement Coverage to satisfy high-end security audits.
  * @author EslaM-X | Lead Technical Architect
  * @version 2.2.4
  */
@@ -31,7 +30,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
   /**
    * @test Vector 1: Lexicographical Key Sorting
-   * @description Ensures hash parity regardless of key insertion order, a core ledger requirement.
+   * @description Ensures hash parity regardless of key insertion order.
    */
   test('Vector 1: Should maintain hash parity regardless of key insertion order', () => {
     const payloadAlpha = { version: "1.0.0", asset: "Pi", amount: 100 };
@@ -42,7 +41,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
   /**
    * @test Vector 2: Recursive Determinism
-   * @description Verifies that nested objects follow strict deterministic sorting at all depths.
+   * @description Verifies nested objects follow strict deterministic sorting at all depths.
    */
   test('Vector 2: Should enforce recursive determinism in multi-level structures', () => {
     const nestedA = { meta: { type: "TX", nonce: 42 }, data: "transfer" };
@@ -66,7 +65,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
   /**
    * @test Vector 4: Primitive Serialization Standards
-   * @description Confirms compliance for basic types (booleans, numbers) as per JCS standards.
+   * @description Confirms compliance for basic types as per JCS standards.
    */
   test('Vector 4: Should serialize primitive types in compliance with JCS standards', () => {
     const input = { active: true, count: 5, label: "node" };
@@ -75,7 +74,6 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
   /**
    * @section Protocol Resilience & Fault Tolerance
-   * @description Boundary analysis to ensure stability under malformed or adversarial inputs.
    */
   describe('PiRC-100: Resilience & Security Gates', () => {
     
@@ -117,26 +115,26 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
     /**
      * @gate Gate 8: Absolute Branch & Line Coverage Hardening
-     * @description Targeting logical branches for 100% audit-readiness without changing existing logic.
+     * @description Targets Uncovered Lines 55-63 (Validator) and 90-96 (SecurityManager).
      */
     test('Gate 8: Should exercise all remaining logical branches for audit compliance', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       /** * Trigger: PiRC100Validator Depth Limit Error Branch [Lines 55-63]
-       * Injection of structure exceeding the allowed protocol nesting level.
+       * Forces code to hit the error return by exceeding nesting threshold.
        */
       const deepFailure = { a: { b: { c: { d: { e: { f: { g: { h: 1 } } } } } } } };
       expect(PiRC100Validator.canonicalize(deepFailure)).toBe("");
 
       /** * Trigger: SecurityManager Internal Catch/Recovery Block [Lines 90-96]
-       * Fault-injection using circular object to force a signature failure.
+       * Triggers JSON serialization error inside the signing logic.
        */
       const circular: any = { id: "fault-injection" };
       circular.self = circular; 
       const secureFailure = SecurityManager.generatePEPProof(circular);
       expect(secureFailure.signature).toBe("");
 
-      /** * Path: Direct Primitive pass-through
+      /** * Final Path: Direct Primitive pass-through coverage.
        */
       expect(PiRC100Validator.canonicalize(42)).toBe("42");
       
