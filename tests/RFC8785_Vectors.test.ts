@@ -139,21 +139,22 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
 
     /**
      * @Gate 8: Absolute Branch Coverage Hardening
-     * Targets remaining branches in Validator (Line 53) and SecurityManager (Line 50).
+     * Targets remaining branches in Validator (Line 56) and SecurityManager (Line 50).
+     *
      */
     test('Gate 8: Should cover all remaining logic branches', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      // 1. Force entry into the catch block through nested depth failure (Validator Line 53)
-      // This specifically triggers the "Recursive limit reached" error found in logs
-      const nestedFailure = { a: { b: { c: { d: { e: { f: "trigger" } } } } } };
+      // 1. استهداف السطر 56 في Validator: محاكاة فشل في هيكل متداخل (Deeply Nested Structure)
+      // بنبعت كائن فيه عمق كبير عشان يرمي Error جوه الـ map function
+      const nestedFailure = { a: { b: { c: { d: { e: { f: { g: 1 } } } } } } };
       expect(PiRC100Validator.canonicalize(nestedFailure)).toBe("");
       
-      // 2. Test non-string/invalid signature types (SecurityManager Line 50)
+      // 2. استهداف السطر 50 في SecurityManager: محاكاة توقيع غير صالح (Null/Undefined Signature)
       expect(SecurityManager.verifyPEPProof({ data: 1 }, null as any, 1)).toBe(false);
       expect(SecurityManager.verifyPEPProof({ data: 1 }, undefined as any, 1)).toBe(false);
       
-      // 3. Test simple primitives to cover Phase 3 branch
+      // 3. اختبار الأنواع البدائية لتغطية Phase 3
       expect(PiRC100Validator.canonicalize(42)).toBe("42");
       expect(PiRC100Validator.canonicalize("Pi")).toBe("\"Pi\"");
 
