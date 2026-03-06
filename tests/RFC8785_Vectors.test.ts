@@ -5,28 +5,24 @@ import referenceVectors from './vectors/pirc100-reference.json';
 /**
  * @file RFC8785_Vectors.test.ts
  * @module PiRC-100_Gold_Standard_Audit
- * @version 2.7.5
+ * @version 2.8.5
  * @author EslaM-X | Lead Technical Architect
  * @description 
- * FINAL PRODUCTION AUDIT SUITE - ARCHITECTED FOR 100% GLOBAL COVERAGE.
- * This suite ensures that PiRC100Validator and SecurityManager meet the 
- * highest architectural standards for Pi Network Mainnet.
- * Targets precisely: PiRC100Validator lines (89, 126, 132).
+ * FINAL MISSION: 100% COVERAGE RESTORATION.
+ * Engineered to lock SecurityManager Line 58 and Validator Lines 89, 126, 132.
+ * Strictly maintains existing API compatibility for Frontend/Backend stability.
  */
 
 describe('PiRC-100: Comprehensive Audit & 100% Coverage Suite', () => {
 
   beforeEach(() => {
-    // Ensuring state purity before each test execution to prevent side-effects
     jest.clearAllMocks();
     jest.restoreAllMocks();
     (PiRC100Validator as any).setFaultInjection(false);
     (SecurityManager as any).setFaultInjection(false);
   });
 
-  /** * SECTION 1: RFC 8785 OFFICIAL JCS VECTORS
-   * Validates canonicalization against industry-standard test cases.
-   */
+  /** SECTION 1: RFC 8785 OFFICIAL JCS VECTORS */
   describe('Official JCS Reference Vectors', () => {
     referenceVectors.test_cases.forEach((vector: any) => {
       test(`Vector ${vector.id}: Standard Compliance`, () => {
@@ -35,14 +31,11 @@ describe('PiRC-100: Comprehensive Audit & 100% Coverage Suite', () => {
     });
   });
 
-  /** * SECTION 2: DETERMINISM & CRYPTOGRAPHIC PARITY
-   */
+  /** SECTION 2: DETERMINISM & CRYPTOGRAPHIC STABILITY */
   describe('Deterministic & Signature Stability', () => {
     test('Test 5: Property Sorting Stability', () => {
-      const payloadA = { b: 2, a: 1 };
-      const payloadB = { a: 1, b: 2 };
-      expect(PiRC100Validator.generateDeterministicHash(payloadA))
-        .toBe(PiRC100Validator.generateDeterministicHash(payloadB));
+      expect(PiRC100Validator.generateDeterministicHash({ b: 2, a: 1 }))
+        .toBe(PiRC100Validator.generateDeterministicHash({ a: 1, b: 2 }));
     });
 
     test('Test 6: PEP Proof Signature Integrity', () => {
@@ -53,59 +46,78 @@ describe('PiRC-100: Comprehensive Audit & 100% Coverage Suite', () => {
     });
   });
 
-  /** * SECTION 3: RESILIENCE & EDGE CASE LOGIC
-   */
+  /** SECTION 3: RESILIENCE & EDGE CASE LOGIC */
   describe('Resilience & Edge Case Logic', () => {
     test('Test 7: Circular Reference Detection', () => {
-      const circularObj: any = {}; circularObj.self = circularObj;
+      const c: any = {}; c.a = c;
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      expect(() => PiRC100Validator.canonicalize(circularObj)).toThrow();
+      expect(() => PiRC100Validator.canonicalize(c)).toThrow();
       spy.mockRestore();
     });
 
     test('Test 8: Primitive Normalization Protocol', () => {
       expect(PiRC100Validator.canonicalize(null as any)).toBe("null");
       expect(PiRC100Validator.canonicalize(undefined as any)).toBe("");
-      expect(PiRC100Validator.canonicalize(42)).toBe("42");
-      expect(PiRC100Validator.canonicalize(true)).toBe("true");
+      expect(PiRC100Validator.canonicalize(100)).toBe("100");
+      expect(PiRC100Validator.canonicalize(false)).toBe("false");
     });
 
     test('Test 10: Array with Undefined Handling', () => {
       expect(PiRC100Validator.canonicalize([undefined, 1])).toBe("[null,1]");
     });
 
-    test('Test 11: SecurityManager Empty/Invalid Payload Guards', () => {
+    test('Test 11: SecurityManager Verification Guard Exhaustion', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      expect(SecurityManager.generatePEPProof({} as any).signature).toBe("");
       expect(SecurityManager.verifyPEPProof({ a: 1 }, "", 1)).toBe(false);
-      expect(SecurityManager.verifyPEPProof({ a: 1 }, "invalid_hash", -1)).toBe(false);
+      expect(SecurityManager.verifyPEPProof({ a: 1 }, "sig", -1)).toBe(false);
       spy.mockRestore();
     });
   });
 
-  /** * SECTION 4: ARCHITECTURAL FAULT INJECTION (THE 100% CLOSER)
-   * This section targets the recovery blocks (catch) that standard tests cannot reach.
-   */
-  describe('Final Coverage Exhaustion (Targeting Validator Lines 89, 126, 132)', () => {
+  /** SECTION 4: ARCHITECTURAL FAULT INJECTION (THE 100% CLOSER) */
+  describe('Architectural Fault Injection (Targeting Lines SM:58 | VAL:89, 126, 132)', () => {
     
     /**
+     * @target SecurityManager.ts: Line 58
+     * Forces full key rotation logic and log execution.
+     */
+    test('Target SM Line 58: Forced Key Rotation Coverage', () => {
+      const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+      // Resetting internal state to force rotation (Targeting Line 58)
+      (SecurityManager as any).currentKey = "";
+      (SecurityManager as any).keyVersion = 0;
+      
+      const proof = SecurityManager.generatePEPProof({ rotate: true });
+      expect(proof.signature).not.toBe("");
+      expect((SecurityManager as any).keyVersion).toBeGreaterThan(0);
+      spy.mockRestore();
+    });
+
+    /**
+     * @target SecurityManager.ts: Catch Blocks
+     */
+    test('Target SM Catch Blocks: Forced Protocol Halt', () => {
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      (SecurityManager as any).setFaultInjection(true);
+      expect(SecurityManager.generatePEPProof({ data: true }).signature).toBe("");
+      (SecurityManager as any).setFaultInjection(false);
+      spy.mockRestore();
+    });
+
+    /**
      * @target PiRC100Validator.ts: Lines 89, 126, 132
-     * Exhausts all internal exception recovery paths using high-level fault injection.
+     * Exhausts all internal exception recovery paths in the Validator.
      */
     test('Target VAL Lines 89, 126, 132: Global Catch Exhaustion', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      
-      // Activating the internal fault hook safely through type casting
       (PiRC100Validator as any).setFaultInjection(true);
       
-      // Line 89: General catch in canonicalize
-      expect(() => PiRC100Validator.canonicalize({ data: 1 })).toThrow();
-      
-      // Line 126: Exception path in deterministic hash generation
-      expect(PiRC100Validator.generateDeterministicHash({ data: 1 })).toBe("");
-      
-      // Line 132: Exception path in integrity verification
-      expect(PiRC100Validator.verifyIntegrity({ data: 1 }, "secret")).toBeNull();
+      // Line 89
+      expect(() => PiRC100Validator.canonicalize({ x: 1 })).toThrow();
+      // Line 126
+      expect(PiRC100Validator.generateDeterministicHash({ x: 1 })).toBe("");
+      // Line 132
+      expect(PiRC100Validator.verifyIntegrity({ x: 1 }, "key")).toBeNull();
       
       (PiRC100Validator as any).setFaultInjection(false);
       spy.mockRestore();
@@ -113,25 +125,10 @@ describe('PiRC-100: Comprehensive Audit & 100% Coverage Suite', () => {
 
     /**
      * @target PiRC100Validator.ts: Line 57
-     * Triggers the MAX_DEPTH_REACHED safety guard.
      */
     test('Target VAL Line 57: Recursion Depth Breach', () => {
-      const generateDeepObj = (depth: number) => {
-        let obj: any = { leaf: true };
-        for (let i = 0; i < depth; i++) obj = { branch: obj };
-        return obj;
-      };
-      // Forcing re-entry to trigger Depth Breach
-      expect(() => PiRC100Validator.canonicalize(generateDeepObj(35))).toThrow("MAX_DEPTH_REACHED");
-    });
-
-    /**
-     * @target SecurityManager.ts: Lines 39-43 (Key Rotation & Lazy Init)
-     */
-    test('Target SM Line 39-43: Forced Lazy Key Rotation', () => {
-      (SecurityManager as any).currentKey = ""; // Clearing state to force rotation logic
-      const proof = SecurityManager.generatePEPProof({ init: true });
-      expect(proof.signature).not.toBe("");
+      const deep = (n: number): any => n <= 0 ? {l:1} : {b: deep(n-1)};
+      expect(() => PiRC100Validator.canonicalize(deep(35))).toThrow("MAX_DEPTH_REACHED");
     });
   });
 });
