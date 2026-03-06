@@ -15,6 +15,9 @@ import referenceVectors from './vectors/pirc100-reference.json';
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
 
+  /**
+   * Reset environment state before each execution to prevent cross-test contamination.
+   */
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -95,7 +98,6 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
     /**
      * @target PiRC100Validator.ts:Line 63 (Map Catch)
-     * Forces an iteration error using a throwing property descriptor.
      */
     test('Test 13: Internal Mapping Loop Catch-Guard (Line 63)', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -108,7 +110,6 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
     /**
      * @target PiRC100Validator.ts:Lines 97, 101, 103
-     * Validates integrity failures and deterministic hash recovery.
      */
     test('Test 14: Integrity Fault-Tolerance Path (Line 97)', () => {
       expect(PiRC100Validator.verifyIntegrity(null as any, "secret")).toBeNull();
