@@ -9,9 +9,9 @@ import referenceVectors from './vectors/pirc100-reference.json';
  * @description 
  * Finalized Test Suite for PiRC-100 Deterministic Serialization.
  * Engineered for 100% Audit Path Exhaustion (Stmt/Branch/Line).
- * Targets Validator uncovered lines [50, 63] and SecurityManager [39].
+ * Targets Validator uncovered lines [50, 63, 103] and SecurityManager [39].
  * @author EslaM-X | Lead Technical Architect
- * @version 2.4.2
+ * @version 2.4.6
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
@@ -71,7 +71,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
     /**
      * @target Coverage: SecurityManager Line 39
-     * Ensuring empty object and null handling are registered.
+     * Force the (!payload || Object.keys(payload).length === 0) branch.
      */
     test('Gate 3: SecurityManager Empty/Invalid Payload Rejection', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -97,7 +97,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
     /**
      * @gate Gate 8: Absolute Logical Path Exhaustion (The Audit Closer)
-     * @description Surgical targeting of remaining uncovered lines 50 and 63.
+     * @description Surgical targeting of remaining uncovered lines.
      */
     test('Gate 8: Absolute Logical Path Exhaustion for 100% Audit Compliance', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -107,17 +107,19 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       expect(() => PiRC100Validator.canonicalize(buildDeep(35))).toThrow("MAX_DEPTH_REACHED");
 
       // 2. Target: Validator Sub-Structure Failure (Line 63)
-      // We force a failure inside a getter to trigger the NESTED_FAIL/SUB_FAIL path.
+      // Forced crash during key mapping to trigger the nested error path.
       const proxyErr = { a: { get b() { throw new Error("INTERNAL"); } } };
       expect(() => PiRC100Validator.canonicalize(proxyErr)).toThrow();
 
-      // 3. Target: SecurityManager & Validator Catch Blocks
+      // 3. Target: Validator Integrity Catch Block (Line 103)
       const circ: any = { id: "audit-trigger" };
       circ.self = circ; 
+      // This forces the catch block inside verifyIntegrity and generateDeterministicHash
+      expect(PiRC100Validator.verifyIntegrity(circ, "secret")).toBeNull();
+      expect(PiRC100Validator.generateDeterministicHash(circ)).toBe("");
       expect(SecurityManager.generatePEPProof(circ).signature).toBe(""); 
-      expect(PiRC100Validator.generateDeterministicHash(circ)).toBe(""); 
 
-      // 4. Target: JCS Array Undefined Serialization
+      // 4. Target: JCS Array Undefined Path
       expect(PiRC100Validator.canonicalize([undefined])).toBe("[null]");
       
       spy.mockRestore();
