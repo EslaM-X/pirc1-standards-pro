@@ -2,6 +2,7 @@
   "protocol": "PiRC-100",
   "version": "1.0.0",
   "description": "RFC 8785 Canonicalization & Deterministic Hashing Reference Vectors",
+  "author": "EslaM-X",
   "test_cases": [
     {
       "id": "V1_LEXICOGRAPHICAL_SORT",
@@ -23,4 +24,3 @@
     }
   ]
 }
-
