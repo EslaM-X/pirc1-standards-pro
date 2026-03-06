@@ -48,6 +48,7 @@ export class PiRC100Validator {
       if (Array.isArray(obj)) {
         const items = obj.map(item => {
           const res = PiRC100Validator.canonicalize(item, depth + 1);
+          // Atomic Check: If nested element fails, propagate failure to protect the signature
           if (res === "" && item !== null && item !== undefined) throw new Error("Nested failure");
           return res;
         });
@@ -69,7 +70,7 @@ export class PiRC100Validator {
           
           const processedValue = PiRC100Validator.canonicalize(value, depth + 1);
           
-          // Atomic Validation: If sub-tree fails, the whole branch must fail to protect the hash.
+          // Atomic Validation: Ensure consistent hash failure on nested security violations
           if (processedValue === "" && value !== null && value !== undefined) {
             throw new Error("Recursive limit reached in sub-structure");
           }
