@@ -6,7 +6,7 @@
  * and comprehensive cryptographic coverage reporting.
  * Integrated with the RFC 8785 (JCS) Deterministic Validation Suite to ensure 
  * zero hash divergence across distributed node environments.
- * @version 2.1.0-PRO
+ * @version 2.2.1-PRO
  * @author EslaM-X | Lead Technical Architect
  */
 
@@ -29,14 +29,15 @@ module.exports = {
   /**
    * @section CoverageThreshold
    * @description Defines strict architectural guardrails to prevent untested logic.
-   * Enforces a "Zero-Defect" policy by requiring 100% function coverage for PiRC-100.
+   * Enforces a "Zero-Defect" policy by requiring 100% full coverage for PiRC-100.
+   * [Surgical Update: Raised to 100% to meet Gold Standard Audit Requirements]
    */
   coverageThreshold: {
     global: {
-      branches: 95,
-      functions: 100, // Mandatory compliance: Every function must be cryptographically validated.
-      lines: 98,
-      statements: 98
+      branches: 100,      // Mandatory: Every logical branch must be validated.
+      functions: 100,     // Mandatory compliance: Every function must be cryptographically validated.
+      lines: 100,         // Mandatory: Zero uncovered lines for 100% Audit.
+      statements: 100     // Mandatory: Every instruction must be executed in the suite.
     }
   },
 
@@ -53,7 +54,7 @@ module.exports = {
    */
   transform: {
     '^.+\\.ts$': ['ts-jest', {
-      // Configuration moved here to align with ts-jest v29.x+ standards.
+      // Configuration aligned with ts-jest v29.x+ standards.
       tsconfig: 'tsconfig.json'
     }]
   },
