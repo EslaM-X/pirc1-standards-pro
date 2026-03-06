@@ -8,9 +8,10 @@ import referenceVectors from './vectors/pirc100-reference.json';
  * @module PiRC100_Integrity_Audit
  * @description 
  * DEFINITIVE PATH EXHAUSTION SUITE.
- * Engineered for 100% coverage across all security gates.
- * Targets: SecurityManager.ts:43 and PiRC100Validator.ts:63.
- * Maintainer: EslaM-X | Lead Technical Architect
+ * Engineered by EslaM-X to reach 100% coverage across all security gates.
+ * Targets precisely: SecurityManager.ts:43 and PiRC100Validator.ts:63.
+ * @author EslaM-X | Lead Technical Architect
+ * @version 2.9.0
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
@@ -72,18 +73,18 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
     /**
      * @target SecurityManager.ts:43
-     * @description Forces the catch block by using a Proxy that bypasses 
-     * the empty check but throws during the cryptographic phase.
+     * @description Forces the catch block by using an enumerable property that
+     * throws during the hash processing phase. This bypasses initial validation.
      */
     test('Gate 3: SecurityManager Internal Error Coverage', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      // Target Line 39: Empty Payload Rejection
+      // Target: Line 39 (Validation fast-fail)
       expect(SecurityManager.generatePEPProof({} as any).signature).toBe("");
 
-      // Target Line 43: Forced Internal Protocol Halt
-      // Proxy ensures Object.keys(poison).length > 0 but throws on access
-      const poison = new Proxy({ bypass: true }, {
+      // Target: Line 43 (Internal Protocol Halt)
+      // Using a Proxy to bypass Stage 1 and throw during Phase 3
+      const poison = new Proxy({ trigger: true }, {
         get: () => { throw new Error("INTERNAL_CRYPTOGRAPHIC_HALT"); }
       });
       
@@ -106,7 +107,8 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
     /**
      * @target PiRC100Validator.ts:63
-     * @description Orchestrates a mapping exception within the iteration loop.
+     * @description Orchestrates a mapping exception within the iteration loop
+     * to satisfy strict 100% line coverage requirements.
      */
     test('Gate 8: Absolute Logical Path Exhaustion', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -116,7 +118,6 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       expect(() => PiRC100Validator.canonicalize(buildDeep(35))).toThrow();
 
       // Target: Line 63 Mapping Catch
-      // Use an enumerable property that throws upon access
       const bomb = Object.defineProperty({}, 'error', {
         get: () => { throw new Error("MAP_ITERATION_FAIL"); },
         enumerable: true
