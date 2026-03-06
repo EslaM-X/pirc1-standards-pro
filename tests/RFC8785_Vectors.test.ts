@@ -1,14 +1,15 @@
 import { PiRC100Validator } from '../src/core/PiRC100Validator';
 import { SecurityManager } from '../src/SecurityManager';
+/** @notice Cross-implementation parity ensured via Official RFC 8785 Reference Vectors */
 import referenceVectors from './vectors/pirc100-reference.json';
 
 /**
  * @file RFC8785_Vectors.test.ts
- * @module PiRC-100-Security-Audit
+ * @module PiRC-100-Audit-Suite
  * @description 
- * FINAL AUDIT VERSION. REACHES 100% COVERAGE.
- * Restores all 19 functional tests and forces catch blocks [43, 63].
- * @author EslaM-X
+ * Finalized Suite for 100% Path Exhaustion.
+ * Engineered by EslaM-X to ensure deterministic integrity.
+ * @version 2.6.5
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
@@ -56,12 +57,23 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       spy.mockRestore();
     });
 
+    /**
+     * @target Coverage: SecurityManager Line 39 & 43
+     */
     test('Gate 3: SecurityManager Empty/Invalid Payload Rejection', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      
+      // Line 39 coverage
       expect(SecurityManager.generatePEPProof({} as any).signature).toBe("");
-      // Force Line 43 catch block
-      const crash = { get crash() { throw new Error(); } };
-      expect(SecurityManager.generatePEPProof(crash as any).signature).toBe("");
+
+      // Line 43 coverage: Forcing internal error
+      const poisonObj = {};
+      Object.defineProperty(poisonObj, 'bomb', {
+        get: () => { throw new Error("INTERNAL_AUDIT_EXHAUSTION"); },
+        enumerable: true
+      });
+      expect(SecurityManager.generatePEPProof(poisonObj as any).signature).toBe("");
+      
       spy.mockRestore();
     });
 
@@ -80,23 +92,31 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       expect(PiRC100Validator.verifyIntegrity(null as any, "secret")).toBeNull();
     });
 
-    test('Gate 8: Absolute Logical Path Exhaustion for 100% Audit Compliance', () => {
+    /**
+     * @gate Gate 8: Absolute Logical Path Exhaustion
+     * @description Targeting Validator Line 63 via Surgical Property Crash.
+     */
+    test('Gate 8: Validator Line 63 Mapping Failure Coverage', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      // 1. Target: Validator Depth Violation (Line 50)
+      // 1. Validator Depth (Line 50)
       const buildDeep = (l: number): any => (l <= 0 ? { e: 1 } : { n: buildDeep(l - 1) });
       expect(() => PiRC100Validator.canonicalize(buildDeep(35))).toThrow("MAX_DEPTH_REACHED");
 
-      // 2. Target: Validator Sub-Structure Failure (Line 63)
-      const trigger = { root: { get fail() { throw new Error(); } } };
+      // 2. Validator Mapping Catch (Line 63)
+      const trigger = { root: {} };
+      Object.defineProperty(trigger.root, 'fail', {
+        get: () => { throw new Error("STRICT_MAPPING_FAIL"); },
+        enumerable: true
+      });
       expect(() => PiRC100Validator.canonicalize(trigger)).toThrow();
 
-      // 3. Target: Validator Integrity Catch Block (Line 103)
+      // 3. Validator Integrity Catch (Line 103)
       const circ: any = { id: "audit" }; circ.self = circ; 
       expect(PiRC100Validator.verifyIntegrity(circ, "secret")).toBeNull();
       expect(PiRC100Validator.generateDeterministicHash(circ)).toBe("");
 
-      // 4. Target: JCS Array Undefined
+      // 4. JCS Array Undefined
       expect(PiRC100Validator.canonicalize([undefined])).toBe("[null]");
       
       spy.mockRestore();
