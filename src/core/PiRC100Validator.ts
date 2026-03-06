@@ -28,10 +28,10 @@ export class PiRC100Validator {
    * @returns {string} - An RFC 8785 compliant canonical string or empty on failure.
    */
   public static canonicalize(obj: any, depth: number = 0): string {
-    // Phase 1: Null-Safety
-    if (obj === null || obj === undefined) {
-      return ""; 
-    }
+    // Phase 1: JCS Null-Safety (CRITICAL FIX for V3_NULL_HANDLING)
+    // RFC 8785 requires 'null' as a literal string for null values.
+    if (obj === null) return "null"; 
+    if (obj === undefined) return ""; 
 
     try {
       // Phase 2: Recursion Depth Protection (Architectural Safety Gate)
@@ -48,7 +48,7 @@ export class PiRC100Validator {
       if (Array.isArray(obj)) {
         const items = obj.map(item => {
           const res = PiRC100Validator.canonicalize(item, depth + 1);
-          // Atomic Check: Ensures fail-safe propagation for nested elements
+          // Fail-safe propagation for nested elements violating security gates
           if (res === "" && item !== null && item !== undefined) {
             throw new Error("Nested array failure");
           }
@@ -73,8 +73,8 @@ export class PiRC100Validator {
           const processedValue = PiRC100Validator.canonicalize(value, depth + 1);
           
           /**
-           * Atomic Validation: Ensure consistent hash failure on nested security violations.
-           * Targets Branch Coverage for Line 56 in the recent audit report.
+           * Atomic Validation: Ensure consistent hash failure on nested violations.
+           * Directly targets Branch Coverage (formerly Lines 49-57).
            */
           if (processedValue === "" && value !== null && value !== undefined) {
             throw new Error("Recursive limit reached in sub-structure");
@@ -99,8 +99,6 @@ export class PiRC100Validator {
   /**
    * @method generateDeterministicHash
    * @description Generates a collision-resistant SHA-256 hash.
-   * @param {any} payload - Data structure to be hashed.
-   * @returns {string} - Hexadecimal representation of the SHA-256 digest.
    */
   public static generateDeterministicHash(payload: any): string {
     const canonicalData = this.canonicalize(payload);
@@ -110,9 +108,6 @@ export class PiRC100Validator {
   /**
    * @method verifyIntegrity
    * @description Signs or verifies the payload integrity using HMAC-SHA256.
-   * @param {any} payload - The message to be authenticated.
-   * @param {string} secret - Ephemeral symmetric key.
-   * @returns {string} - HMAC authentication tag for cross-node validation.
    */
   public static verifyIntegrity(payload: any, secret: string): string {
     const canonicalData = this.canonicalize(payload);
