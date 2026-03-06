@@ -9,9 +9,9 @@ import referenceVectors from './vectors/pirc100-reference.json';
  * @description 
  * Finalized Test Suite for PiRC-100 Deterministic Serialization.
  * Engineered for 100% Audit Path Exhaustion (Stmt/Branch/Line).
- * Targets Validator uncovered lines [50, 63, 103] and SecurityManager [39].
+ * Targets Validator uncovered lines [50, 63, 103] and SecurityManager [39, 43].
  * @author EslaM-X | Lead Technical Architect
- * @version 2.5.2
+ * @version 2.5.5
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
@@ -70,7 +70,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
     });
 
     /**
-     * @target Coverage: SecurityManager Line 39
+     * @target Coverage: SecurityManager Line 39 & 43
      * Inducing specific payload rejection paths and internal error catch.
      */
     test('Gate 3: SecurityManager Empty/Invalid Payload Rejection', () => {
@@ -80,9 +80,10 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       expect(SecurityManager.generatePEPProof({} as any).signature).toBe("");
       expect(SecurityManager.generatePEPProof(null as any).signature).toBe("");
       
-      // Target line 43: catch block (using a throwing circular reference)
-      const circ: any = {}; circ.self = circ;
-      expect(SecurityManager.generatePEPProof(circ).signature).toBe("");
+      // Target line 43: SecurityManager catch block coverage
+      // We pass an object that will cause a crash inside the Validator
+      const thrower = new Proxy({}, { get: () => { throw new Error("CRASH"); } });
+      expect(SecurityManager.generatePEPProof(thrower).signature).toBe("");
       
       spy.mockRestore();
     });
@@ -114,9 +115,12 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       expect(() => PiRC100Validator.canonicalize(buildDeep(35))).toThrow("MAX_DEPTH_REACHED");
 
       // 2. Target: Validator Sub-Structure Failure (Line 63)
-      // Using a throwing getter to trigger the catch block inside key mapping
-      const proxyErr = { a: { get b() { throw new Error("INTERNAL_FAIL"); } } };
-      expect(() => PiRC100Validator.canonicalize(proxyErr)).toThrow();
+      // Using a throwing Proxy property to trigger the inner map() catch block
+      const trigger = new Proxy({ val: 1 }, { 
+        get: (t, p) => { if(p === 'val') throw new Error("FAIL"); return t[p as keyof typeof t]; } 
+      });
+      const failObj = { root: trigger };
+      expect(() => PiRC100Validator.canonicalize(failObj)).toThrow();
 
       // 3. Target: Validator Integrity Catch Block (Line 103)
       const circ: any = { id: "audit-trigger" };
