@@ -8,7 +8,7 @@ import { PiRC100Validator } from './core/PiRC100Validator';
  * Engineered for RFC 8785 Compliance and 100% Audit Path Coverage.
  * Includes Fault Injection capabilities for resilience auditing.
  * @author EslaM-X | Lead Technical Architect
- * @version 2.4.6
+ * @version 2.4.7
  */
 export class SecurityManager {
   private static currentKey: string = "";
@@ -18,12 +18,14 @@ export class SecurityManager {
   /**
    * @property _faultInjection
    * INTERNAL AUDIT TOOL: Forces protocol halts to verify catch-block logic.
+   * Strategically placed to trigger the fail-soft mechanism during testing.
    */
   private static _faultInjection: boolean = false;
 
   /**
    * @method setFaultInjection
    * Architectural hook to simulate cryptographic or system failures during testing.
+   * This is the master switch used by the test suite to reach 100% coverage.
    */
   public static setFaultInjection(state: boolean): void {
     this._faultInjection = state;
@@ -37,6 +39,7 @@ export class SecurityManager {
     this.currentKey = randomBytes(32).toString('hex');
     this.keyVersion += 1;
     this.lastRotation = Date.now();
+    // Audit-compliant logging for key lifecycle management
     console.log(`[PiRC1 Security] Key Rotated. Version: ${this.keyVersion}`);
   }
 
@@ -47,7 +50,10 @@ export class SecurityManager {
    */
   public static generatePEPProof(payload: object): { signature: string; version: number } {
     try {
-      // INTERNAL FAULT INJECTION: Trigger for Line 43 Catch Block
+      /**
+       * INTERNAL FAULT INJECTION (Target Line 62)
+       * Forces code execution to enter the catch block during security audits.
+       */
       if (this._faultInjection) {
         throw new Error("SIMULATED_SECURITY_HALT");
       }
@@ -63,7 +69,7 @@ export class SecurityManager {
       }
 
       /** * Phase 3: RFC 8785 Canonicalization
-       * Deterministic transformation via PiRC100Validator.
+       * Deterministic transformation via PiRC100Validator to ensure hash parity.
        */
       const canonicalData = PiRC100Validator.canonicalize(payload);
       
@@ -79,7 +85,7 @@ export class SecurityManager {
       };
     } catch (error: any) {
       /**
-       * Phase 5: Safe Fail-Soft Strategy [Line 43 Coverage Target]
+       * Phase 5: Safe Fail-Soft Strategy [Target Line 62 Coverage]
        * Logs protocol halts and returns empty signature for rejection.
        */
       console.error(`[SecurityManager] Protocol Halt: ${error.message}`);
