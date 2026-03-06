@@ -7,6 +7,7 @@ import { SecurityManager } from '../src/SecurityManager';
  * Formal Test Suite for PiRC-100 Deterministic Serialization compliance.
  * Verifies that the implementation adheres to RFC 8785 (JCS) and prevents 
  * hash divergence across distributed nodes.
+ * Updated to ensure 100% function coverage and 98%+ line coverage.
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
@@ -71,5 +72,46 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
     // Expected RFC 8785 format: keys sorted, no whitespace
     expect(result).toBe('{"active":true,"count":5,"label":"node"}');
   });
-});
 
+  /**
+   * Coverage Hardening: Boundary & Error Conditions
+   * Targets uncovered lines 25, 58-59 in PiRC100Validator and 69-73 in SecurityManager.
+   */
+  describe('PiRC-100: Protocol Resilience & Error Path Coverage', () => {
+    
+    test('Gate 1: Should handle null/undefined payloads gracefully (Line 25)', () => {
+      const result = PiRC100Validator.canonicalize(null as any);
+      expect(result).toBe(""); // Ensures validator returns empty string on null input
+    });
+
+    test('Gate 2: Should catch and log serialization errors for circular references (Lines 58-59)', () => {
+      const circular: any = { name: "Pi" };
+      circular.self = circular; // Trigger JSON.stringify failure
+      
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const result = PiRC100Validator.canonicalize(circular);
+      
+      expect(result).toBe(""); 
+      expect(spy).toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
+    test('Gate 3: SecurityManager should fail safely on invalid payloads (Lines 69-73)', () => {
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      
+      // Passing null to trigger the catch block in generatePEPProof
+      const proof = SecurityManager.generatePEPProof(null as any);
+      
+      expect(proof.signature).toBe("");
+      expect(spy).toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
+    test('Gate 4: Should verify key rotation logging (Line 30)', () => {
+      const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+      SecurityManager.rotateKeys();
+      expect(spy).toHaveBeenCalledWith(expect.stringContaining("Rotated"));
+      spy.mockRestore();
+    });
+  });
+});
