@@ -6,7 +6,6 @@ import { SecurityManager } from '../src/SecurityManager';
  * @description 
  * Formal Test Suite for PiRC-100 Deterministic Serialization compliance.
  * Verifies RFC 8785 (JCS) adherence and secures 100% coverage across all modules.
- * High-performance deterministic validation for the Pi Network ecosystem.
  * @author EslaM-X | Lead Technical Architect
  */
 
@@ -80,14 +79,14 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       const result = PiRC100Validator.canonicalize(circular);
       
-      expect(result).toBe(""); // Returns empty on caught error
+      expect(result).toBe(""); 
       expect(spy).toHaveBeenCalled();
       spy.mockRestore();
     });
 
     test('Gate 3: SecurityManager should fail safely on invalid payloads', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      const proof = SecurityManager.generatePEPProof({} as any); // Anti-Blind Signing
+      const proof = SecurityManager.generatePEPProof({} as any); 
       
       expect(proof.signature).toBe("");
       expect(spy).toHaveBeenCalled();
@@ -140,10 +139,13 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
 
     /**
      * @Gate 8: Absolute Branch Coverage Hardening
-     * Targets remaining branches in Validator (Line 52) and SecurityManager (Line 50).
+     * Targets remaining branches in Validator (Line 53) and SecurityManager (Line 50).
      */
     test('Gate 8: Should cover all remaining logic branches', () => {
-      // 1. Force entry into the catch block through nested failure (Validator Line 52)
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      // 1. Force entry into the catch block through nested depth failure (Validator Line 53)
+      // This specifically triggers the "Recursive limit reached" error found in logs
       const nestedFailure = { a: { b: { c: { d: { e: { f: "trigger" } } } } } };
       expect(PiRC100Validator.canonicalize(nestedFailure)).toBe("");
       
@@ -154,6 +156,8 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
       // 3. Test simple primitives to cover Phase 3 branch
       expect(PiRC100Validator.canonicalize(42)).toBe("42");
       expect(PiRC100Validator.canonicalize("Pi")).toBe("\"Pi\"");
+
+      spy.mockRestore();
     });
   });
 });
