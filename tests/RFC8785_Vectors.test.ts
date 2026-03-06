@@ -8,7 +8,8 @@ import referenceVectors from './vectors/pirc100-reference.json';
  * @module PiRC-100-Audit-Suite
  * @description 
  * Finalized Suite for 100% Path Exhaustion.
- * Engineered by EslaM-X to ensure deterministic integrity.
+ * Restores all 19 functional tests and forces catch blocks [43, 63].
+ * @author EslaM-X | Lead Technical Architect
  * @version 2.6.5
  */
 
@@ -66,7 +67,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       // Line 39 coverage
       expect(SecurityManager.generatePEPProof({} as any).signature).toBe("");
 
-      // Line 43 coverage: Forcing internal error
+      // Line 43 coverage: Forcing internal error via enumerable getter bomb
       const poisonObj = {};
       Object.defineProperty(poisonObj, 'bomb', {
         get: () => { throw new Error("INTERNAL_AUDIT_EXHAUSTION"); },
