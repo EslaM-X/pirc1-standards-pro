@@ -4,18 +4,21 @@ import { SecurityManager } from '../src/SecurityManager';
 /**
  * @file RFC8785_Vectors.test.ts
  * @description 
- * Formal Test Suite for PiRC-100 Deterministic Serialization compliance.
- * Verifies RFC 8785 (JCS) adherence and secures 100% coverage across all modules.
- * @author EslaM-X | Lead Technical Architect
+ * Comprehensive Test Suite for PiRC-100 Deterministic Serialization compliance.
+ * Verifies strict adherence to RFC 8785 (JSON Canonicalization Scheme - JCS).
+ * Ensures 100% Code Coverage across core cryptographic and validation modules.
+ * * @author EslaM-X | Lead Technical Architect
+ * @version 2.1.0
  */
 
-describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
+describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
 
   /**
-   * Test Vector 1: Lexicographical Key Sorting
-   * Ensures that reordering keys does not mutate the final cryptographic hash.
+   * @test Vector 1: Lexicographical Key Sorting
+   * @description Validates that key reordering does not affect the cryptographic digest.
+   * This ensures state consistency across distributed Pi Network nodes.
    */
-  test('Vector 1: Should maintain hash consistency regardless of key order', () => {
+  test('Vector 1: Should maintain hash parity regardless of key insertion order', () => {
     const payloadAlpha = { version: "1.0.0", asset: "Pi", amount: 100 };
     const payloadBeta = { amount: 100, version: "1.0.0", asset: "Pi" };
 
@@ -26,9 +29,10 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
   });
 
   /**
-   * Test Vector 2: Nested Object Determinism
+   * @test Vector 2: Nested Object Canonicalization
+   * @description Ensures that nested structures follow deterministic sorting rules.
    */
-  test('Vector 2: Should enforce determinism in nested data structures', () => {
+  test('Vector 2: Should enforce recursive determinism in multi-level data structures', () => {
     const nestedA = { meta: { type: "TX", nonce: 42 }, data: "transfer" };
     const nestedB = { data: "transfer", meta: { nonce: 42, type: "TX" } };
 
@@ -39,9 +43,10 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
   });
 
   /**
-   * Test Vector 3: SecurityManager PEP Integration
+   * @test Vector 3: SecurityManager PEP (Policy Enforcement Point) Integration
+   * @description Verifies that the SecurityManager produces identical signatures for identical canonical states.
    */
-  test('Vector 3: SecurityManager must generate identical signatures for reordered payloads', () => {
+  test('Vector 3: SecurityManager must yield consistent signatures for isomorphic payloads', () => {
     SecurityManager.rotateKeys();
     const data1 = { action: "login", timestamp: 1710000000 };
     const data2 = { timestamp: 1710000000, action: "login" };
@@ -53,28 +58,29 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
   });
 
   /**
-   * Test Vector 4: Primitive Type Consistency
+   * @test Vector 4: JCS Primitive Standardization
+   * @description Confirms that primitives (Booleans, Numbers, Strings) are serialized per RFC 8785 specifications.
    */
-  test('Vector 4: Should handle primitive types according to JCS standards', () => {
+  test('Vector 4: Should serialize primitive types in compliance with JCS standards', () => {
     const input = { active: true, count: 5, label: "node" };
     const result = PiRC100Validator.canonicalize(input);
     expect(result).toBe('{"active":true,"count":5,"label":"node"}');
   });
 
   /**
-   * Coverage Hardening: Boundary & Error Conditions
-   * Targets 100% function coverage and 100% line coverage.
+   * Coverage Hardening: Boundary Analysis & Error Path Validation
+   * Designed to achieve 100% branch and statement coverage for security auditing.
    */
-  describe('PiRC-100: Protocol Resilience & Error Path Coverage', () => {
+  describe('PiRC-100: Protocol Resilience & Fault Tolerance', () => {
     
-    test('Gate 1: Should handle null/undefined payloads gracefully', () => {
+    test('Gate 1: Should handle null or undefined inputs with fail-safe mechanisms', () => {
       expect(PiRC100Validator.canonicalize(null as any)).toBe("");
       expect(PiRC100Validator.canonicalize(undefined as any)).toBe("");
     });
 
-    test('Gate 2: Should catch and log serialization errors for circular references', () => {
+    test('Gate 2: Should intercept and mitigate circular reference risks', () => {
       const circular: any = { name: "Pi" };
-      circular.self = circular; // Trigger explicit circular check
+      circular.self = circular; 
       
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       const result = PiRC100Validator.canonicalize(circular);
@@ -84,7 +90,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
       spy.mockRestore();
     });
 
-    test('Gate 3: SecurityManager should fail safely on invalid payloads', () => {
+    test('Gate 3: SecurityManager must abort signing on invalid/empty payloads', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       const proof = SecurityManager.generatePEPProof({} as any); 
       
@@ -93,7 +99,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
       spy.mockRestore();
     });
 
-    test('Gate 4: Should verify key rotation logging', () => {
+    test('Gate 4: Should confirm operational logging during Key Rotation', () => {
       const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
       SecurityManager.rotateKeys();
       expect(spy).toHaveBeenCalledWith(expect.stringContaining("Rotated"));
@@ -101,14 +107,15 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
     });
 
     /**
-     * @Gate 5: Architectural Integrity Check
-     * Blocks deep nesting attacks using a level-10 object to trigger MAX_DEPTH protection.
+     * @Gate 5: Recursive Depth Protection
+     * Guards against Stack Overflow and Resource Exhaustion attacks.
      */
-    test('Gate 5: Should handle Arrays and nested Depth limits', () => {
+    test('Gate 5: Should enforce Maximum Recursion Depth limits', () => {
       const arrResult = PiRC100Validator.canonicalize([1, 2, { z: 0 }]);
       expect(arrResult).toBe("[1,2,{\"z\":0}]");
 
-      const deep = { a: { b: { c: { d: { e: { f: { g: { h: { i: { j: 1 } } } } } } } } } };
+      // Triggers MAX_DEPTH error path
+      const deep = { a: { b: { c: { d: { e: { f: { g: 1 } } } } } } };
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       expect(PiRC100Validator.canonicalize(deep)).toBe(""); 
@@ -116,7 +123,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
       spy.mockRestore();
     });
 
-    test('Gate 6: Should verify PEP Proof and handle version mismatch', () => {
+    test('Gate 6: Should validate PEP Proofs and detect version mismatches', () => {
       const payload = { auth: "valid" };
       const proof = SecurityManager.generatePEPProof(payload);
       
@@ -125,7 +132,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
       expect(SecurityManager.verifyPEPProof(payload, "", proof.version)).toBe(false);
     });
 
-    test('Gate 7: Should verify Cryptographic Helper functions directly', () => {
+    test('Gate 7: Internal Cryptographic Helper Integrity', () => {
       const payload = { pirc: 100 };
       const secret = "node-secret";
       
@@ -134,27 +141,29 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
 
       expect(hash).toBeDefined();
       expect(integrity).toBeDefined();
-      expect(hash.length).toBe(64);
+      expect(hash).toHaveLength(64); // SHA-256 hex length
     });
 
     /**
      * @Gate 8: Absolute Branch Coverage Hardening
-     * Targets remaining branches in Validator (Line 56) and SecurityManager (Line 50).
-     *
+     * Specifically targets Line 56 (Validator) and Line 50 (SecurityManager).
      */
-    test('Gate 8: Should cover all remaining logic branches', () => {
+    test('Gate 8: Should exercise all remaining logical branches for audit compliance', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      // 1. استهداف السطر 56 في Validator: محاكاة فشل في هيكل متداخل (Deeply Nested Structure)
-      // بنبعت كائن فيه عمق كبير عشان يرمي Error جوه الـ map function
-      const nestedFailure = { a: { b: { c: { d: { e: { f: { g: 1 } } } } } } };
+      // 1. Trigger nested object failure (Validator Line 56)
+      const nestedFailure = { key: { a: { b: { c: { d: { e: { f: 1 } } } } } } };
       expect(PiRC100Validator.canonicalize(nestedFailure)).toBe("");
       
-      // 2. استهداف السطر 50 في SecurityManager: محاكاة توقيع غير صالح (Null/Undefined Signature)
+      // 2. Trigger nested array failure (Validator Line 53)
+      const arrayFailure = [ { a: { b: { c: { d: { e: { f: 1 } } } } } } ];
+      expect(PiRC100Validator.canonicalize(arrayFailure)).toBe("");
+
+      // 3. Verify null/undefined signature edge cases (SecurityManager Line 50)
       expect(SecurityManager.verifyPEPProof({ data: 1 }, null as any, 1)).toBe(false);
       expect(SecurityManager.verifyPEPProof({ data: 1 }, undefined as any, 1)).toBe(false);
       
-      // 3. اختبار الأنواع البدائية لتغطية Phase 3
+      // 4. Exercise primitive serialization branch
       expect(PiRC100Validator.canonicalize(42)).toBe("42");
       expect(PiRC100Validator.canonicalize("Pi")).toBe("\"Pi\"");
 
