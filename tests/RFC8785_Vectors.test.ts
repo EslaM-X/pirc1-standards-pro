@@ -10,7 +10,7 @@ import referenceVectors from './vectors/pirc100-reference.json';
  * Finalized Test Suite for PiRC-100 Deterministic Serialization.
  * Engineered for 100% Audit Coverage without breaking Frontend-Backend parity.
  * * @author EslaM-X | Lead Technical Architect
- * @version 2.2.8
+ * @version 2.2.9
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
@@ -84,7 +84,6 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
     });
 
     test('Gate 5: Should enforce Maximum Recursion Depth limits', () => {
-      // Triggering depth guard (MAX_DEPTH = 5)
       const deep = { a: { b: { c: { d: { e: { f: 1 } } } } } };
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       expect(PiRC100Validator.canonicalize(deep)).toBe(""); 
@@ -102,19 +101,19 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
     /**
      * @gate Gate 8: Final Path Exhaustion (The Audit Closer)
-     * Targets Uncovered Lines: Validator (55-63, 121-122) & SecurityManager (90-96)
+     * استهداف مباشر للسطور المتبقية 55-63 و 90-96 و 121-122
      */
     test('Gate 8: Absolute Logical Path Exhaustion for 100% Audit Compliance', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       /** * Target: Validator Depth Violation [55-63]
-       * Must exceed MAX_DEPTH (5) to reach the error branch. Sending level 7.
+       * إرسال عمق 7 مستويات لكسر حاجز الـ MAX_DEPTH = 5 وتفعيل مسار الخطأ.
        */
       const deepFailure = { l1: { l2: { l3: { l4: { l5: { l6: { l7: 1 } } } } } } };
       expect(PiRC100Validator.canonicalize(deepFailure)).toBe("");
 
       /** * Target: SecurityManager Catch Block [90-96]
-       * Forcing internal cryptographic failure via circular dependency to hit 'catch'.
+       * إجبار الـ SecurityManager على الفشل داخلياً عبر مرجع دائري.
        */
       const circular: any = { id: "fault-injection" };
       circular.self = circular; 
@@ -122,12 +121,12 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       expect(secureFailure.signature).toBe(""); 
 
       /** * Target: Validator Integrity Fail-Safe [121-122]
-       * Testing the return false logic for non-object/null inputs.
+       * إرسال null للتأكد من تغطية شرط التحقق من النوع.
        */
       const integrityFailure = PiRC100Validator.verifyIntegrity(null as any, "secret");
       expect(integrityFailure).toBe(false);
 
-      // Final coverage for simple primitives (Lines Coverage)
+      // تغطية شاملة لأنواع البيانات الأولية لضمان Lines Coverage
       expect(PiRC100Validator.canonicalize(100)).toBe("100");
       expect(PiRC100Validator.canonicalize(false)).toBe("false");
       
