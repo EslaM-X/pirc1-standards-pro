@@ -139,16 +139,21 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
     });
 
     /**
-     * @Gate 8: Branch Hardening
-     * Ensures 100% Branch Coverage by testing simple types and failure scenarios.
+     * @Gate 8: Absolute Branch Coverage Hardening
+     * Targets remaining branches in Validator (Line 52) and SecurityManager (Line 50).
      */
     test('Gate 8: Should cover all remaining logic branches', () => {
-      // Covers Validator Line 51 (Primitive types)
-      expect(PiRC100Validator.canonicalize(100)).toBe("100");
-      expect(PiRC100Validator.canonicalize("Pi")).toBe("\"Pi\"");
+      // 1. Force entry into the catch block through nested failure (Validator Line 52)
+      const nestedFailure = { a: { b: { c: { d: { e: { f: "trigger" } } } } } };
+      expect(PiRC100Validator.canonicalize(nestedFailure)).toBe("");
       
-      // Covers SecurityManager Line 50 (Symmetry checks)
-      expect(SecurityManager.verifyPEPProof({ x: 1 }, "bad_sig", 1)).toBe(false);
+      // 2. Test non-string/invalid signature types (SecurityManager Line 50)
+      expect(SecurityManager.verifyPEPProof({ data: 1 }, null as any, 1)).toBe(false);
+      expect(SecurityManager.verifyPEPProof({ data: 1 }, undefined as any, 1)).toBe(false);
+      
+      // 3. Test simple primitives to cover Phase 3 branch
+      expect(PiRC100Validator.canonicalize(42)).toBe("42");
+      expect(PiRC100Validator.canonicalize("Pi")).toBe("\"Pi\"");
     });
   });
 });
