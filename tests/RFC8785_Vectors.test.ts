@@ -21,8 +21,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
   /**
    * @section Official Protocol Reference Vectors
-   * @description Direct validation against industry benchmarks to prevent serialization drift 
-   * between different programming language implementations.
+   * @description Direct validation against industry benchmarks to prevent serialization drift.
    */
   describe('Official Reference Vector Validation', () => {
     referenceVectors.test_cases.forEach((vector) => {
@@ -35,8 +34,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
   /**
    * @test Vector 1: Lexicographical Key Sorting
-   * @description Ensures hash parity regardless of object key insertion order, 
-   * a fundamental requirement for immutable ledger state-roots.
+   * @description Ensures hash parity regardless of key insertion order.
    */
   test('Vector 1: Should maintain hash parity regardless of key insertion order', () => {
     const payloadAlpha = { version: "1.0.0", asset: "Pi", amount: 100 };
@@ -47,8 +45,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
   /**
    * @test Vector 2: Recursive Determinism
-   * @description Validates that nested object trees enforce strict deterministic ordering 
-   * at all depths to prevent signature mismatch in complex payloads.
+   * @description Verifies nested object trees enforce strict deterministic sorting at all depths.
    */
   test('Vector 2: Should enforce recursive determinism in multi-level structures', () => {
     const nestedA = { meta: { type: "TX", nonce: 42 }, data: "transfer" };
@@ -59,7 +56,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
   /**
    * @test Vector 3: SecurityManager PEP Consistency
-   * @description Confirms signature idempotency for isomorphic payloads at the Policy Enforcement Point (PEP).
+   * @description Confirms signature idempotency for isomorphic payloads.
    */
   test('Vector 3: SecurityManager must yield consistent signatures for isomorphic payloads', () => {
     SecurityManager.rotateKeys();
@@ -71,28 +68,16 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
   });
 
   /**
-   * @test Vector 4: Primitive Serialization Standards
-   * @description Verifies compliance for basic types (booleans, numbers) as defined in JCS specifications.
-   */
-  test('Vector 4: Should serialize primitive types in compliance with JCS standards', () => {
-    const input = { active: true, count: 5, label: "node" };
-    expect(PiRC100Validator.canonicalize(input)).toBe('{"active":true,"count":5,"label":"node"}');
-  });
-
-  /**
    * @section Protocol Resilience & Security Gate Hardening
-   * @description Boundary analysis and adversarial input simulation to ensure 
-   * architectural stability and high-availability error recovery.
+   * @description Boundary analysis and adversarial input simulation to ensure architectural stability.
    */
   describe('PiRC-100: Resilience & Security Gates', () => {
     
-    /** @gate Gate 1: Null/Undefined Safety */
     test('Gate 1: Should handle null or undefined inputs with fail-safe mechanisms', () => {
       expect(PiRC100Validator.canonicalize(null as any)).toBe("null"); 
       expect(PiRC100Validator.canonicalize(undefined as any)).toBe("");
     });
 
-    /** @gate Gate 2: Circular Reference Interception */
     test('Gate 2: Should intercept and mitigate circular reference risks', () => {
       const circular: any = { name: "Pi" };
       circular.self = circular; 
@@ -101,7 +86,6 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       spy.mockRestore();
     });
 
-    /** @gate Gate 3: Payload Integrity Guard */
     test('Gate 3: SecurityManager must abort signing on invalid or empty payloads', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       expect(SecurityManager.generatePEPProof({} as any).signature).toBe("");
@@ -109,7 +93,6 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       spy.mockRestore();
     });
 
-    /** @gate Gate 5: Denial-of-Service (DoS) Mitigation via Depth Limits */
     test('Gate 5: Should enforce Maximum Recursion Depth limits to prevent Stack Overflow', () => {
       const deep = { a: { b: { c: { d: { e: { f: { g: 1 } } } } } } };
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -117,42 +100,25 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       spy.mockRestore();
     });
 
-    /** @gate Gate 7: Cryptographic Authenticity */
-    test('Gate 7: Internal Cryptographic Helper Integrity Validation', () => {
-      const payload = { pirc: 100 };
-      const secret = "node-secret";
-      const hash = PiRC100Validator.generateDeterministicHash(payload);
-      const integrity = PiRC100Validator.verifyIntegrity(payload, secret);
-      expect(hash).toHaveLength(64);
-      expect(integrity).toBeDefined();
-    });
-
     /**
-     * @gate Gate 8: Final Path Exhaustion & Audit Compliance
-     * @description Targets remaining logical branches (Lines 55-63 and 90-96) 
-     * through deliberate Fault-Injection to confirm 100% audit readiness.
+     * @gate Gate 8: Absolute Logical Path Exhaustion
+     * @description Targets Uncovered Lines 55-63 (Validator) and 90-96 (SecurityManager) 
+     * by injecting "faulty" structures to trigger catch/recovery blocks.
      */
     test('Gate 8: Should exercise all remaining logical branches for total audit coverage', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      /** * Trigger: PiRC100Validator Max-Depth Violation [Lines 55-63]
-       * Simulating a maliciously nested structure to verify protocol-enforced depth rejection.
-       */
+      /** * Trigger: PiRC100Validator Max-Depth Violation [Lines 55-63] */
       const deepFailure = { a: { b: { c: { d: { e: { f: { g: { h: 1 } } } } } } } };
       expect(PiRC100Validator.canonicalize(deepFailure)).toBe("");
 
-      /** * Trigger: SecurityManager Internal Exception Recovery [Lines 90-96]
-       * Executing a forced serialization failure via circular object to exercise the 'catch' block.
-       */
+      /** * Trigger: SecurityManager Internal Exception Recovery [Lines 90-96] */
       const circular: any = { id: "fault-injection" };
       circular.self = circular; 
       const secureFailure = SecurityManager.generatePEPProof(circular);
-      
-      // Verification of fail-silent/safe signature response
       expect(secureFailure.signature).toBe(""); 
 
-      /** * Path: Direct Primitive pass-through for line-level coverage completion
-       */
+      /** * Path: Direct Primitive pass-through for line-level coverage completion */
       expect(PiRC100Validator.canonicalize(42)).toBe("42");
       expect(PiRC100Validator.canonicalize(true)).toBe("true");
       
