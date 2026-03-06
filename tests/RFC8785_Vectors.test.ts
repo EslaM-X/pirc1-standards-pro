@@ -8,8 +8,8 @@ import referenceVectors from './vectors/pirc100-reference.json';
  * @module PiRC-100-Security-Audit
  * @description 
  * FINAL AUDIT VERSION. REACHES 100% COVERAGE.
- * Restores all 19 functional tests and forces catch blocks [43, 63].
- * @author EslaM-X | Lead Technical Architect
+ * Engineered by EslaM-X to ensure deterministic integrity without breaking Frontend/Backend logic.
+ * @version 2.7.0
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
@@ -59,20 +59,21 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
     /**
      * @target Coverage: SecurityManager Line 39 & 43
+     * Inducing a crash during the hash generation phase.
      */
-    test('Gate 3: SecurityManager Empty/Invalid Payload Rejection', () => {
+    test('Gate 3: SecurityManager Internal Error Coverage', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      // Line 39 coverage
+      // Line 39
       expect(SecurityManager.generatePEPProof({} as any).signature).toBe("");
 
-      // Line 43 coverage: Forcing internal error via enumerable getter bomb
-      const poisonObj = {};
-      Object.defineProperty(poisonObj, 'bomb', {
+      // Line 43: Catch block via Getter Bomb
+      const fatalObj = {};
+      Object.defineProperty(fatalObj, 'trigger', {
         get: () => { throw new Error("INTERNAL_AUDIT_EXHAUSTION"); },
         enumerable: true
       });
-      expect(SecurityManager.generatePEPProof(poisonObj as any).signature).toBe("");
+      expect(SecurityManager.generatePEPProof(fatalObj as any).signature).toBe("");
       
       spy.mockRestore();
     });
@@ -104,11 +105,12 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       expect(() => PiRC100Validator.canonicalize(buildDeep(35))).toThrow("MAX_DEPTH_REACHED");
 
       // 2. Validator Mapping Catch (Line 63)
-      const trigger = { root: {} };
-      Object.defineProperty(trigger.root, 'fail', {
+      const bomb = {};
+      Object.defineProperty(bomb, 'fail', {
         get: () => { throw new Error("STRICT_MAPPING_FAIL"); },
         enumerable: true
       });
+      const trigger = { data: bomb };
       expect(() => PiRC100Validator.canonicalize(trigger)).toThrow();
 
       // 3. Validator Integrity Catch (Line 103)
