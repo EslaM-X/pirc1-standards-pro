@@ -103,20 +103,15 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
 
     /**
      * @Gate 5: Architectural Integrity Check
-     * This test demonstrates the system's ability to block deep nesting attacks.
-     * We use a level-10 object to trigger the MAX_DEPTH (5) protection.
+     * Blocks deep nesting attacks using a level-10 object to trigger MAX_DEPTH protection.
      */
     test('Gate 5: Should handle Arrays and nested Depth limits', () => {
-      // 1. Verify Array support
       const arrResult = PiRC100Validator.canonicalize([1, 2, { z: 0 }]);
       expect(arrResult).toBe("[1,2,{\"z\":0}]");
 
-      // 2. High-Friction Security Check: 
-      // We use a depth of 10 levels. Since MAX_DEPTH is 5, the validator must catch the overflow.
       const deep = { a: { b: { c: { d: { e: { f: { g: { h: { i: { j: 1 } } } } } } } } } };
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      // The validator returns "" when it encounters an error internally.
       expect(PiRC100Validator.canonicalize(deep)).toBe(""); 
       expect(spy).toHaveBeenCalledWith(expect.stringContaining("Maximum recursion depth"));
       spy.mockRestore();
@@ -126,19 +121,11 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
       const payload = { auth: "valid" };
       const proof = SecurityManager.generatePEPProof(payload);
       
-      // Success Path
       expect(SecurityManager.verifyPEPProof(payload, proof.signature, proof.version)).toBe(true);
-      
-      // Fail Path: Version Mismatch
       expect(SecurityManager.verifyPEPProof(payload, proof.signature, 999)).toBe(false);
-      
-      // Fail Path: Missing Signature
       expect(SecurityManager.verifyPEPProof(payload, "", proof.version)).toBe(false);
     });
 
-    /**
-     * Target: Uncovered Functions in Validator
-     */
     test('Gate 7: Should verify Cryptographic Helper functions directly', () => {
       const payload = { pirc: 100 };
       const secret = "node-secret";
@@ -148,7 +135,20 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
 
       expect(hash).toBeDefined();
       expect(integrity).toBeDefined();
-      expect(hash.length).toBe(64); // SHA-256 Hex length
+      expect(hash.length).toBe(64);
+    });
+
+    /**
+     * @Gate 8: Branch Hardening
+     * Ensures 100% Branch Coverage by testing simple types and failure scenarios.
+     */
+    test('Gate 8: Should cover all remaining logic branches', () => {
+      // Covers Validator Line 51 (Primitive types)
+      expect(PiRC100Validator.canonicalize(100)).toBe("100");
+      expect(PiRC100Validator.canonicalize("Pi")).toBe("\"Pi\"");
+      
+      // Covers SecurityManager Line 50 (Symmetry checks)
+      expect(SecurityManager.verifyPEPProof({ x: 1 }, "bad_sig", 1)).toBe(false);
     });
   });
 });
