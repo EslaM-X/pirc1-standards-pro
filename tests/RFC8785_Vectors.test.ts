@@ -1,15 +1,14 @@
 import { PiRC100Validator } from '../src/core/PiRC100Validator';
 import { SecurityManager } from '../src/SecurityManager';
-/** @notice RFC 8785 Deterministic Vectors */
+/** @notice RFC 8785 Reference Vectors */
 import referenceVectors from './vectors/pirc100-reference.json';
 
 /**
  * @file RFC8785_Vectors.test.ts
  * @module PiRC100_Integrity_Audit
  * @description 
- * FINAL AUDIT VERSION - ZERO ASSUMPTIONS.
- * Targets precisely: SecurityManager.ts:43 and PiRC100Validator.ts:63.
- * Engineered by EslaM-X to ensure 100% Core Team compliance.
+ * FINAL PATH EXHAUSTION SUITE - VERSION 3.0.0
+ * Engineered by EslaM-X for 100% Coverage & Core Team Compliance.
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
@@ -42,70 +41,77 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
   describe('Resilience Testing & Security Gates', () => {
     
-    test('Gate 1: Null and Undefined Protocol Handling', () => {
+    test('Gate 1: Null, Undefined, and Empty Handling', () => {
       expect(PiRC100Validator.canonicalize(null as any)).toBe("null"); 
       expect(PiRC100Validator.canonicalize(undefined as any)).toBe("");
+      expect(PiRC100Validator.canonicalize({})).toBe("{}");
     });
 
-    /**
-     * @target SecurityManager.ts:43
-     * Force internal catch by bypassing empty-check in line 39
-     * then exploding during the hashing phase.
-     */
+    test('Gate 2: Circular Reference & Depth Interception', () => {
+      const nodeA: any = { name: "NodeA" };
+      const nodeB: any = { name: "NodeB" };
+      nodeA.link = nodeB;
+      nodeB.link = nodeA; 
+      
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      // Hit Circular Check
+      expect(() => PiRC100Validator.canonicalize(nodeA)).toThrow(); 
+      // Hit Depth Check (Line 34)
+      const deep = (n: number): any => (n <= 0 ? { x: 1 } : { n: deep(n - 1) });
+      expect(() => PiRC100Validator.canonicalize(deep(35))).toThrow();
+      spy.mockRestore();
+    });
+
     test('Gate 3: SecurityManager Internal Error Coverage', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      // Line 39 Coverage
+      // Hit Line 39: Empty Check
       expect(SecurityManager.generatePEPProof({} as any).signature).toBe("");
 
-      // Line 43 Coverage: The "Proxy Bomb"
-      // This object appears to have keys (bypasses line 39), 
-      // but throws as soon as the validator tries to read them.
-      const toxic = new Proxy({ trigger: true }, {
-        get: (t, p) => {
-          if (p === 'trigger') throw new Error("PROTOCOL_INTERNAL_HALT");
-          return (t as any)[p];
-        }
+      // Hit Line 43: Catch Block (Internal Cryptographic Halt)
+      const poison = Object.defineProperty({}, 'trigger', {
+        get: () => { throw new Error("INTERNAL_FAIL"); },
+        enumerable: true
       });
+      expect(SecurityManager.generatePEPProof(poison).signature).toBe("");
+
+      // Hit Line 82: verifyPEPProof Fast-Fail
+      expect(SecurityManager.verifyPEPProof({a:1}, "", 0)).toBe(false);
       
-      expect(SecurityManager.generatePEPProof(toxic).signature).toBe("");
       spy.mockRestore();
     });
 
-    /**
-     * @target PiRC100Validator.ts:63
-     * Force the map iteration to fail internally.
-     */
     test('Gate 8: Absolute Logical Path Exhaustion', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      // Line 34: Depth Limit
-      const buildDeep = (l: number): any => (l <= 0 ? { x: 1 } : { n: buildDeep(l - 1) });
-      expect(() => PiRC100Validator.canonicalize(buildDeep(35))).toThrow();
-
-      // Line 63: Mapping Catch (Internal Loop Failure)
-      // Using Object.create(null) with a throwing enumerable property.
-      const bomb = Object.create(null);
-      Object.defineProperty(bomb, 'kaboom', {
-        get: () => { throw new Error("INTERNAL_MAP_FAILURE"); },
+      // Hit Line 63: Map Iteration Catch
+      const bomb = Object.defineProperty({}, 'err', {
+        get: () => { throw new Error("MAP_FAIL"); },
         enumerable: true
       });
-
-      // Wrap it in another object to reach Stage 6 in Validator
       expect(() => PiRC100Validator.canonicalize({ data: bomb })).toThrow();
 
-      // Line 103: Integrity Catch
-      const circ: any = { id: 1 }; circ.self = circ; 
-      expect(PiRC100Validator.verifyIntegrity(circ, "secret")).toBeNull();
+      // Hit Line 87, 97, 101: verifyIntegrity Edge Cases
+      expect(PiRC100Validator.verifyIntegrity(null as any, "key")).toBeNull();
+      const circ: any = { a: 1 }; circ.self = circ;
+      expect(PiRC100Validator.verifyIntegrity(circ, "key")).toBeNull();
+      
+      // Hit Line 103/104: Hash Catch
+      expect(PiRC100Validator.generateDeterministicHash(circ)).toBe("");
       
       spy.mockRestore();
     });
 
-    test('Gate 4: verifyPEPProof Logic Coverage', () => {
+    test('Gate 4: verifyPEPProof Logic Pathing', () => {
       SecurityManager.rotateKeys();
       const payload = { auth: "valid" };
       const proof = SecurityManager.generatePEPProof(payload);
       expect(SecurityManager.verifyPEPProof(payload, proof.signature, proof.version)).toBe(true);
+      expect(SecurityManager.verifyPEPProof(payload, "wrong", proof.version)).toBe(false);
+    });
+    
+    test('Gate 9: Array Path Coverage', () => {
+      expect(PiRC100Validator.canonicalize([undefined, null, 1])).toBe("[null,null,1]");
     });
   });
 });
