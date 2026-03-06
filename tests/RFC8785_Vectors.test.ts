@@ -63,7 +63,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
 
   /**
    * Coverage Hardening: Boundary & Error Conditions
-   * Targets 100% function coverage and 98%+ line coverage.
+   * Targets 100% function coverage and 100% line coverage.
    */
   describe('PiRC-100: Protocol Resilience & Error Path Coverage', () => {
     
@@ -105,8 +105,8 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
       const arrResult = PiRC100Validator.canonicalize([1, 2, { z: 0 }]);
       expect(arrResult).toBe("[1,2,{\"z\":0}]");
 
-      // Testing Depth limit: Object depth of 7 triggers MAX_DEPTH (5)
-      const deep = { a: { b: { c: { d: { e: { f: { g: 1 } } } } } } };
+      // Testing Depth limit: Object depth of 6 triggers MAX_DEPTH (5)
+      const deep = { a: { b: { c: { d: { e: { f: 1 } } } } } };
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       expect(PiRC100Validator.canonicalize(deep)).toBe(""); 
@@ -129,7 +129,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity', () => {
     });
 
     /**
-     * Target: Uncovered Functions/Lines in Validator
+     * Target: Uncovered Functions in Validator
      */
     test('Gate 7: Should verify Cryptographic Helper functions directly', () => {
       const payload = { pirc: 100 };
