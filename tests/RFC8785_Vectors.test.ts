@@ -5,19 +5,16 @@ import referenceVectors from './vectors/pirc100-reference.json';
 /**
  * @file RFC8785_Vectors.test.ts
  * @module PiRC-100_Gold_Standard_Audit
- * @version 2.2.6
+ * @version 2.2.7
  * @author EslaM-X | Lead Technical Architect
  * @description 
  * DEFINITIVE PRODUCTION SUITE - 100% CODE COVERAGE MANDATE.
+ * Targets elusive catch blocks at SecurityManager:43 and Validator:63, 101, 103.
  * Engineered for zero-break compatibility between Backend logic and Frontend execution.
- * Total Tests: 20 | Compliance: RFC 8785 (JCS) Deterministic Validation.
  */
 
 describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () => {
 
-  /**
-   * Reset environment state before each execution to prevent cross-test contamination.
-   */
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -63,9 +60,14 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       spy.mockRestore();
     });
 
-    test('Test 8: Primitive Normalization (Null & Undefined)', () => {
+    test('Test 8: Primitive Normalization (Null & Undefined Handling)', () => {
       expect(PiRC100Validator.canonicalize(null as any)).toBe("null");
       expect(PiRC100Validator.canonicalize(undefined as any)).toBe("");
+    });
+
+    test('Test 9: Numeric and Boolean Branch Parity', () => {
+      expect(PiRC100Validator.canonicalize(true)).toBe("true");
+      expect(PiRC100Validator.canonicalize(42)).toBe("42");
     });
 
     test('Test 10: Absolute Depth Limit Interception (Line 34)', () => {
@@ -79,11 +81,12 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
     /**
      * @target SecurityManager.ts:Line 43 (Catch Block)
-     * Utilizes a Proxy Trap to force an immediate runtime exception during stringification.
+     * Utilizes a Proxy Trap to force an immediate runtime exception during property access.
      */
     test('Test 12: SecurityManager Internal Catch Recovery (Line 43)', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      const proxyPoison = new Proxy({ auth: true }, {
+      // Proxy ensures any attempt to read keys triggers an error for the catch block
+      const proxyPoison = new Proxy({ trigger: true }, {
         get: () => { throw new Error("FORCE_INTERNAL_CATCH"); }
       });
       expect(SecurityManager.generatePEPProof(proxyPoison as any).signature).toBe("");
@@ -92,7 +95,7 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
     /**
      * @target PiRC100Validator.ts:Line 63 (Map Catch)
-     * Triggers the internal iteration catch via an enumerable property getter exception.
+     * Forces an iteration error using a throwing property descriptor.
      */
     test('Test 13: Internal Mapping Loop Catch-Guard (Line 63)', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -105,16 +108,23 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
 
     /**
      * @target PiRC100Validator.ts:Lines 97, 101, 103
-     * Comprehensive coverage for the Integrity Verification failure paths.
+     * Validates integrity failures and deterministic hash recovery.
      */
-    test('Test 14: Integrity Fault-Tolerance Path (Lines 97, 101, 103)', () => {
+    test('Test 14: Integrity Fault-Tolerance Path (Line 97)', () => {
+      expect(PiRC100Validator.verifyIntegrity(null as any, "secret")).toBeNull();
+    });
+
+    test('Test 15: Integrity Circular Reference Catch (Line 101)', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
       const circ: any = { id: 1 }; circ.self = circ;
-      
-      expect(PiRC100Validator.verifyIntegrity(null as any, "secret")).toBeNull();
       expect(PiRC100Validator.verifyIntegrity(circ, "secret")).toBeNull();
+      spy.mockRestore();
+    });
+
+    test('Test 16: Deterministic Hash Fault-Tolerance (Line 103)', () => {
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const circ: any = { id: 1 }; circ.self = circ;
       expect(PiRC100Validator.generateDeterministicHash(circ)).toBe("");
-      
       spy.mockRestore();
     });
 
@@ -133,10 +143,9 @@ describe('PiRC-100: RFC 8785 Deterministic Vectors & Integrity Compliance', () =
       expect(SecurityManager.verifyPEPProof({ ok: true }, p.signature, 999)).toBe(false);
     });
 
-    test('Test 20: Array & Primitive Branch Parity (Lines 104-105)', () => {
+    test('Test 20: Array Normalization Coverage (Lines 104-105)', () => {
       expect(PiRC100Validator.canonicalize([undefined, 1])).toBe("[null,1]");
-      expect(PiRC100Validator.canonicalize(true)).toBe("true");
-      expect(PiRC100Validator.canonicalize(100)).toBe("100");
+      expect(PiRC100Validator.canonicalize([null, "test"])).toBe("[null,\"test\"]");
     });
   });
 });
