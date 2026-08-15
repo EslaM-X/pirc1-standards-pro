@@ -48,7 +48,7 @@ await reportActivity({
 });
 ```
 The App-Manifest Schema
-```josn
+```json
 {
   "utility_framework": {
     "version": "1.0.0",
@@ -92,7 +92,7 @@ This architecture was originally conceptualized and developed by **EslaM-X** to 
 ### 🤝 Collaboration & Feedback
 I am ready to provide the full codebase and detailed implementation logic to the Pi Core Team. Let's build a Pi ecosystem that is technically invincible.
 
-**Connect with me:** [GitHub](https://github.com/EslaM-X) | [LinkedIn](#) | [PiRC1 Discussion](https://github.com/PiNetwork/PiRC/pull/2)
+**Connect with me:** [GitHub](https://github.com/EslaM-X) | [PiRC1 Discussion](https://github.com/PiNetwork/PiRC/pull/2)
 
 ---
 © 2026 EslaM-X. Released under MIT License. Standardizing the future of Pi Network.
