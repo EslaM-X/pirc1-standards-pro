@@ -1,4 +1,6 @@
 # 🚀 PiRC1-Protocol: Standardizing Utility & Security for Pi Web3
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![CI](https://github.com/EslaM-X/pirc1-standards-pro/actions/workflows/main.yml/badge.svg)](https://github.com/EslaM-X/pirc1-standards-pro/actions)
 **Architected by: [EslaM-X](https://github.com/EslaM-X)** *Lead Technical Architect | Full-Stack Web3 Expert | Egypt 🇪🇬*
 
 ---
