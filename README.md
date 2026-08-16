@@ -97,5 +97,17 @@ I am ready to provide the full codebase and detailed implementation logic to the
 **Connect with me:** [GitHub](https://github.com/EslaM-X) | [PiRC1 Discussion](https://github.com/PiNetwork/PiRC/pull/2)
 
 ---
+
+### 🧑‍💻 Contributing
+
+Contributions are welcome — standards are only standards when the community
+adopts them. Start with the [Contributing Guide](CONTRIBUTING.md) and the
+[Code of Conduct](CODE_OF_CONDUCT.md).
+
+- **Good first issues** are labelled `good first issue` / `good first contribution`.
+- Every change keeps `npm test` green and links the issue it closes.
+- See the [changelog](CHANGELOG.md) for release history.
+
+---
 © 2026 EslaM-X. Released under MIT License. Standardizing the future of Pi Network.
 

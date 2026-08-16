@@ -1,0 +1,56 @@
+name: Bug report
+description: Report a reproducible bug in the PiRC1 standards proposal
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. A good bug report includes the exact way to
+        reproduce it offline — the test suite never requires network or keys.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the unexpected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: |
+        Paste a minimal script or test that reproduces the bug offline.
+      placeholder: |
+        npm test
+        # → ✗ PEP signature verification ... expected
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - PEP signature verification (src)
+        - Sigmoid tier logic (src/SigmoidTierLogic.ts)
+        - Manifest schema (pi-manifest.json)
+        - Schema validation tests
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Node version, OS, and whether npm install completed.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I can reproduce this offline (no network, no API keys)
+          required: true
+        - label: I ran `npm test` and this is unrelated to a known limitation
+          required: true

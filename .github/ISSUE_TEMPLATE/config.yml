@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+- name: Discussions
+  url: https://github.com/EslaM-X/pirc1-standards-pro/discussions
+  about: Ask questions and discuss the roadmap here.
+- name: Project documentation
+  url: https://github.com/EslaM-X/pirc1-standards-pro/blob/main/docs
+  about: Standards docs, schema, and protocol details.

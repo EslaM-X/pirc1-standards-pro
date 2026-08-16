@@ -1,0 +1,17 @@
+labels: [discussion]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Welcome to the pirc1-standards-pro discussions
+
+        Standardizing utility & security for Pi Web3 — PEP signatures, the
+        app-manifest schema, and sigmoid tier transitions.
+
+        - **Q&A** — ask anything about the protocol, schema, or implementation.
+        - **Ideas** — proposals for new standards, verification methods, or SDK hooks.
+        - **Show and tell** — share dApps or integrations built on the standard.
+        - **Feedback** — what gets in the way of adopting the standard in your dApp?
+
+        Before posting, skim the [README](../../README.md) and
+        [ROADMAP](../../ROADMAP.md).
